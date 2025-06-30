@@ -1,8 +1,7 @@
 import { useEffect, useRef } from "react";
 
-const Canvas = ({positions, windowSize}) => {
+const Canvas = ({ positions, windowSize }) => {
   const canvasRef = useRef(null);
-  
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -20,20 +19,22 @@ const Canvas = ({positions, windowSize}) => {
     canvas.width = windowSize.width;
     canvas.height = windowSize.height;
 
-    // Effacer
+    // Effacer le canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Dessiner cercle rouge
-    ctx.beginPath();
-    ctx.arc(
-      positions.joueur1.x * windowSize.width,
-      positions.joueur1.y * windowSize.height,
-      20,
-      0,
-      2 * Math.PI
-    );
-    ctx.fillStyle = "red";
-    ctx.fill();
+    Object.keys(positions).forEach((joueur) => {
+      const { x, y, color, status } = positions[joueur];
+
+      ctx.beginPath();
+      ctx.arc(x * windowSize.width, y * windowSize.height, 20, 0, 2 * Math.PI);
+      if (status !== "off") {
+        ctx.fillStyle = color;
+      } else {
+        ctx.fillStyle = "rgba(255,255,255,0)";
+      }
+
+      ctx.fill();
+    });
   }, [positions, windowSize]);
 
   return (
