@@ -99,8 +99,6 @@ function App() {
     };
   }, []);
 
-  //test
-
   useEffect(() => {
     handleSetX(
       numJoueur,
@@ -114,7 +112,9 @@ function App() {
     if (numJoueur) {
       try {
         await fetch(
-          `${import.meta.env.VITE_URL}/api/set-x?joueur=${joueur}&x=${x}&y=${y}&status=${status}`
+          `${
+            import.meta.env.VITE_URL
+          }/api/set-x?joueur=${joueur}&x=${x}&y=${y}&status=${status}`
         );
       } catch (err) {
         console.error("Erreur appel HTTP:", err);
