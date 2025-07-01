@@ -30,7 +30,7 @@ function App() {
   const hasSetNumJoueur = useRef(false);
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8080");
+    const socket = new WebSocket(import.meta.env.VITE_WEB_SOCKET);
 
     socket.onopen = () => {
       console.log("WebSocket connecté");
@@ -112,7 +112,7 @@ function App() {
     if (numJoueur) {
       try {
         await fetch(
-          `http://localhost:3000/set-x?joueur=${joueur}&x=${x}&y=${y}&status=${status}`
+          `${import.meta.env.VITE_URL}/set-x?joueur=${joueur}&x=${x}&y=${y}&status=${status}`
         );
       } catch (err) {
         console.error("Erreur appel HTTP:", err);
