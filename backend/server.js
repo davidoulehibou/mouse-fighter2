@@ -10,7 +10,6 @@ app.use(cors()); // ✅ autorise toutes les origines (par défaut)
 
 // WebSocket
 const wss = new WebSocket.Server({ port: 8080 });
-console.log("WebSocket running on ws://localhost:8080");
 
 // Fonction pour lire/écrire le JSON
 let isWriting = false;
@@ -147,7 +146,7 @@ fs.watch("./data.json", (eventType) => {
 });
 
 // 🚀 Route HTTP pour changer le contenu selon x
-app.get("/set-x", (req, res) => {
+app.get("/api/set-x", (req, res) => {
   const x = parseFloat(req.query.x);
   const y = parseFloat(req.query.y);
   const joueur = req.query.joueur;

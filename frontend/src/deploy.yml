@@ -1,0 +1,93 @@
+name: Deploy Node.js + React App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Create .env for frontend
+        run: |
+          echo "VITE_WEB_SOCKET=${{ secrets.VITE_WEB_SOCKET_MF2 }}" >> ./frontend/.env
+          echo "VITE_URL=${{ secrets.VITE_MDP }}" >> ./frontend/.env
+
+      - name: Install frontend dependencies & build
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run build  # Crée le dossier dist/
+
+      - name: Prepare deployment folder
+        run: |
+          mkdir -p deploy/frontend
+          mkdir -p deploy/backend
+          cp -r frontend/dist deploy/frontend/
+          cp backend/server.js deploy/backend/
+
+      - name: Stop PM2 server before deployment
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_HOST_DEVHIBOU }}
+          username: ${{ secrets.VPS_USER_DEVHIBOU }}
+          key: ${{ secrets.VPS_SSH_KEY_DEVHIBOU }}
+          port: 22
+          script: |
+            pm2 stop mf2 || true  # Ignore error if PM2 is not running
+
+      - name: Deploy frontend (dist only)
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST_DEVHIBOU }}
+          username: ${{ secrets.VPS_USER_DEVHIBOU }}
+          key: ${{ secrets.VPS_SSH_KEY_DEVHIBOU }}
+          port: 22
+          rm : true
+          source: "deploy/frontend/dist/*"
+          target: "/var/www/mf2/frontend/dist"
+          strip_components: 3
+
+      - name: Ensure backend directory exists and has proper permissions
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_HOST_DEVHIBOU }}
+          username: ${{ secrets.VPS_USER_DEVHIBOU }}
+          key: ${{ secrets.VPS_SSH_KEY_DEVHIBOU }}
+          port: 22
+          script: |
+            mkdir -p /var/www/mf2/backend  # Créer le répertoire s'il n'existe pas
+            chmod -R 755 /var/www/mf2/backend  # Assurer les bonnes permissions
+
+
+      - name: Deploy server.js (backend only)
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST_DEVHIBOU }}
+          username: ${{ secrets.VPS_USER_DEVHIBOU }}
+          key: ${{ secrets.VPS_SSH_KEY_DEVHIBOU }}
+          port: 22
+          source: "deploy/backend/server.js"
+          target: "/var/www/mf2/backend/"
+          strip_components: 2
+
+
+      - name: Restart PM2 server after deployment
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_HOST_DEVHIBOU }}
+          username: ${{ secrets.VPS_USER_DEVHIBOU }}
+          key: ${{ secrets.VPS_SSH_KEY_DEVHIBOU }}
+          port: 22
+          script: |
+            pm2 start mf2 || pm2 restart mf2  # Start or restart the server
