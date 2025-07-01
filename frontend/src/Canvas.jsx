@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-const Canvas = ({ positions, windowSize }) => {
+const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -25,15 +25,33 @@ const Canvas = ({ positions, windowSize }) => {
     Object.keys(positions).forEach((joueur) => {
       const { x, y, color, status } = positions[joueur];
 
-      ctx.beginPath();
-      ctx.arc(x * windowSize.width, y * windowSize.height, 20, 0, 2 * Math.PI);
-      if (status !== "off") {
-        ctx.fillStyle = color;
-      } else {
-        ctx.fillStyle = "rgba(255,255,255,0)";
-      }
+      if (status != playerId) {
+        ctx.beginPath();
+        ctx.arc(
+          x * windowSize.width,
+          y * windowSize.height,
+          20,
+          0,
+          2 * Math.PI
+        );
+        if (status !== "off") {
+          ctx.fillStyle = color;
+        } else {
+          ctx.fillStyle = "rgba(255,255,255,0)";
+        }
 
-      ctx.fill();
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(mousePosition.x, mousePosition.y, 20, 0, 2 * Math.PI);
+        if (status !== "off") {
+          ctx.fillStyle = color;
+        } else {
+          ctx.fillStyle = "rgba(255,255,255,0)";
+        }
+
+        ctx.fill();
+      }
     });
   }, [positions, windowSize]);
 

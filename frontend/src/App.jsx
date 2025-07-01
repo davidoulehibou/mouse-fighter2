@@ -124,7 +124,7 @@ function App() {
 
   return (
     <div style={{ position: "relative", height: "100vh", overflow: "hidden" }}>
-      <Canvas positions={positions} windowSize={windowSize} />
+      <Canvas positions={positions} windowSize={windowSize} playerId={randId} mousePosition={mousePosition}/>
       <div style={{ position: "relative", zIndex: 1, padding: "1rem" }}>
         <h1>{numJoueur}</h1>
         <p>
