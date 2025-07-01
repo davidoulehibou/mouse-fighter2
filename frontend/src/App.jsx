@@ -13,7 +13,11 @@ function App() {
     y: 0,
   });
 
-  const [numJoueur, setNumJoueur] = useState(null);
+  const [randId, setRandId] = useState(
+    Math.floor(Math.random() * 89999) + 10000
+  );
+
+  const [numJoueur, setNumJoueur] = useState(0);
 
   const [positions, setPositions] = useState({
     joueur1: {
@@ -25,12 +29,6 @@ function App() {
 
   const hasSetNumJoueur = useRef(false);
 
-
-  // Pour lire un cookie
-  const readCookie = (key) => {
-    return Cookies.get(key);
-  };
-
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8080");
 
@@ -40,23 +38,17 @@ function App() {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
-      if (data) {
-        setPositions(data);
-
-        if (!hasSetNumJoueur.current) {
-          for (const key of Object.keys(data)) {
-            if (data[key].status === "off") {
-              setNumJoueur(key);
-              hasSetNumJoueur.current = true;
-              console.log("numJoueur défini:", key);
-              handleSetX(key, 0, 0, "play");
-              break;
-            }
+      setPositions(data);
+      if (!hasSetNumJoueur.current) {
+        for (const key of Object.keys(data)) {
+          if (data[key].status === "off") {
+            setNumJoueur(key);
+            hasSetNumJoueur.current = true;
+            console.log("numJoueur défini:", key);
+            handleSetX(key, 0, 0, randId);
+            break;
           }
         }
-      } else if (data.error) {
-        console.error("Erreur du serveur:", data.error);
       }
     };
 
@@ -64,12 +56,20 @@ function App() {
       console.error("WebSocket erreur:", err);
     };
 
-    socket.onclose = async () => {
-      console.log("WebSocket fermé");
+    socket.onclose = (event) => {
+      console.log("WebSocket fermé", event.code, event.reason);
     };
 
+    // Ajout pour gérer unload / refresh / fermeture d’onglet
+    const handleBeforeUnload = () => {
+      socket.close(4000, randId.toString());
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     return () => {
-      socket.close();
+      socket.close(4000, randId.toString());
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 
@@ -104,7 +104,7 @@ function App() {
       numJoueur,
       mousePosition.x / windowSize.width,
       mousePosition.y / windowSize.height,
-      "play"
+      randId
     );
   }, [windowSize, mousePosition]);
 
@@ -127,11 +127,13 @@ function App() {
         <h1>{numJoueur}</h1>
         <p>
           joueurs en ligne :{" "}
-          {Object.keys(positions).map((joueur) => (
-            <span key={joueur}>
-              {joueur}: {positions[joueur].status}{" "}
-            </span>
-          ))}
+          {Object.keys(positions)
+            .filter((joueur) => positions[joueur].status !== "off")
+            .map((joueur) => (
+              <span key={joueur}>
+                {joueur}: {positions[joueur].color}{" "}
+              </span>
+            ))}
         </p>
 
         <p>Largeur : {windowSize.width}px</p>

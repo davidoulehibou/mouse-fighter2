@@ -17,7 +17,6 @@ let isWriting = false;
 
 function updateContentByX(joueur, x, y, status) {
   if (isWriting) {
-    console.warn("Écriture en cours. Nouvelle mise à jour ignorée.");
     return;
   }
 
@@ -84,15 +83,64 @@ wss.on("connection", (ws) => {
         ws.send(data);
       } catch {}
     }
+    ws.on("close", (code, reason) => {
+      console.log("deconnexion:", reason.toString());
+      deconnect(reason.toString(), 0, 0, "off");
+    });
   });
 });
 
-wss.on("close", () => {
-  console.log("Un client WebSocket s'est déconnecté.");
-  // Ici tu peux faire une action spécifique, nettoyage, logs, etc.
-});
+function deconnect(id, x, y, status) {
+  isWriting = true;
 
+  fs.readFile("./data.json", "utf8", (err, data) => {
+    if (err) {
+      console.error("Erreur de lecture:", err);
+      isWriting = false;
+      return;
+    }
 
+    let jsonData;
+    try {
+      jsonData = JSON.parse(data);
+    } catch (parseErr) {
+      console.error("Erreur de parsing JSON:", parseErr);
+      isWriting = false;
+      return;
+    }
+
+    function trouverJoueurParStatus(statusRecherche) {
+      for (const [nomJoueur, info] of Object.entries(jsonData)) {
+        if (info.status === statusRecherche) {
+          return { nom: nomJoueur, ...info };
+        }
+      }
+      return null; // Aucun joueur trouvé avec ce status
+    }
+
+    const joueursInfos = trouverJoueurParStatus(id);
+    console.log(joueursInfos);
+    if (joueursInfos) {
+      jsonData[joueursInfos.nom].status = "off";
+      jsonData[joueursInfos.nom].x = 0;
+      jsonData[joueursInfos.nom].y = 0;
+    }
+
+    console.log(jsonData);
+
+    fs.writeFile(
+      "./data.json",
+      JSON.stringify(jsonData, null, 2),
+      "utf8",
+      (writeErr) => {
+        if (writeErr) {
+          console.error("Erreur d'écriture:", writeErr);
+        }
+        isWriting = false;
+      }
+    );
+  });
+}
 
 fs.watch("./data.json", (eventType) => {
   if (eventType === "change") broadcastJson();
@@ -114,8 +162,6 @@ app.get("/set-x", (req, res) => {
   updateContentByX(joueur, x, y, status);
   res.send({ success: true, x, y });
 });
-
-
 
 app.listen(port, () => {
   console.log(`Serveur HTTP sur http://localhost:${port}`);
