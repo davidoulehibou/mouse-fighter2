@@ -21,7 +21,7 @@ jobs:
       - name: Create .env for frontend
         run: |
           echo "VITE_WEB_SOCKET=${{ secrets.VITE_WEB_SOCKET_MF2 }}" >> ./frontend/.env
-          echo "VITE_URL=${{ secrets.VITE_MDP }}" >> ./frontend/.env
+          echo "VITE_URL=${{ secrets.VITE_URL_MF2 }}" >> ./frontend/.env
 
       - name: Install frontend dependencies & build
         working-directory: ./frontend
