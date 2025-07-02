@@ -53,7 +53,7 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
         ctx.fill();
       }
     });
-  }, [positions, windowSize]);
+  }, [positions, windowSize, mousePosition]);
 
   return (
     <canvas

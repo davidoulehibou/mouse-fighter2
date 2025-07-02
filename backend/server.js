@@ -118,14 +118,12 @@ function deconnect(id, x, y, status) {
     }
 
     const joueursInfos = trouverJoueurParStatus(id);
-    console.log(joueursInfos);
     if (joueursInfos) {
       jsonData[joueursInfos.nom].status = "off";
       jsonData[joueursInfos.nom].x = 0;
       jsonData[joueursInfos.nom].y = 0;
     }
 
-    console.log(jsonData);
 
     fs.writeFile(
       "./data.json",

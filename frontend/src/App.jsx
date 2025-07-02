@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Canvas from "./Canvas";
+import TextInput from "./TextInput";
 
 function App() {
   const [windowSize, setWindowSize] = useState({
@@ -147,10 +148,8 @@ function App() {
           Position relatives : X = {mousePosition.x / windowSize.width}px, Y ={" "}
           {mousePosition.y / windowSize.height}px
         </p>
-        <h1>
-          x={positions.joueur1.x} y={positions.joueur1.y}
-        </h1>
       </div>
+      <TextInput joueur={numJoueur}/>
     </div>
   );
 }
