@@ -11,19 +11,44 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
     }
   }, [windowSize]);
 
+  function drawSpeechBubble(ctx, text, x, y) {
+    ctx.font = "20px Arial";
+
+    const padding = 10;
+
+    ctx.beginPath();
+
+    // Top left corner to top right
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y - 10);
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 10, y);
+
+    ctx.closePath();
+
+    // Styles
+    ctx.fillStyle = "#fff";
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    ctx.fill();
+    ctx.stroke();
+
+    // Text
+    ctx.fillStyle = "#000";
+    ctx.fillText(text, x + padding, y - padding);
+  }
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    // Redimensionner le canvas pour qu'il prenne toute la fenêtre
     canvas.width = windowSize.width;
     canvas.height = windowSize.height;
 
-    // Effacer le canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     Object.keys(positions).forEach((joueur) => {
-      const { x, y, color, status } = positions[joueur];
+      const { x, y, color, status, text } = positions[joueur];
 
       if (status != playerId) {
         ctx.beginPath();
@@ -41,6 +66,15 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
         }
 
         ctx.fill();
+
+        if (text != "") {
+          drawSpeechBubble(
+            ctx,
+            text,
+            x * windowSize.width + 20,
+            y * windowSize.height - 20
+          );
+        }
       } else {
         ctx.beginPath();
         ctx.arc(mousePosition.x, mousePosition.y, 20, 0, 2 * Math.PI);
@@ -49,8 +83,11 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
         } else {
           ctx.fillStyle = "rgba(255,255,255,0)";
         }
-
         ctx.fill();
+
+        if (text != "") {
+          drawSpeechBubble(ctx, text, mousePosition.x + 20, mousePosition.y - 20);
+        }
       }
     });
   }, [positions, windowSize, mousePosition]);
