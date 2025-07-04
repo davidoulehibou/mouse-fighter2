@@ -61,6 +61,51 @@ function updateContentByX(joueur, x, y, status) {
   });
 }
 
+function updateText(joueur, text) {
+  if (isWriting) {
+    return;
+  }
+
+  isWriting = true;
+
+  fs.readFile("./data.json", "utf8", (err, data) => {
+    if (err) {
+      console.error("Erreur de lecture:", err);
+      isWriting = false;
+      return;
+    }
+
+    let jsonData;
+    try {
+      jsonData = JSON.parse(data);
+    } catch (parseErr) {
+      console.error("Erreur de parsing JSON:", parseErr);
+      isWriting = false;
+      return;
+    }
+
+    if (jsonData[joueur]) {
+      jsonData[joueur].text = text;
+    } else {
+      console.warn(`Le joueur "${joueur}" n'existe pas dans le fichier.`);
+      isWriting = false;
+      return;
+    }
+
+    fs.writeFile(
+      "./data.json",
+      JSON.stringify(jsonData, null, 2),
+      "utf8",
+      (writeErr) => {
+        if (writeErr) {
+          console.error("Erreur d'écriture:", writeErr);
+        }
+        isWriting = false;
+      }
+    );
+  });
+}
+
 function broadcastJson() {
   fs.readFile("./data.json", "utf8", (err, data) => {
     if (err) return;
@@ -118,14 +163,12 @@ function deconnect(id, x, y, status) {
     }
 
     const joueursInfos = trouverJoueurParStatus(id);
-    console.log(joueursInfos);
     if (joueursInfos) {
       jsonData[joueursInfos.nom].status = "off";
       jsonData[joueursInfos.nom].x = 0;
       jsonData[joueursInfos.nom].y = 0;
     }
 
-    console.log(jsonData);
 
     fs.writeFile(
       "./data.json",
@@ -160,6 +203,21 @@ app.get("/api/set-x", (req, res) => {
 
   updateContentByX(joueur, x, y, status);
   res.send({ success: true, x, y });
+});
+
+
+app.get("/api/settext", (req, res) => {
+  const joueur = req.query.joueur;
+  const text = req.query.text;
+
+
+  updateText(joueur,text);
+
+  setTimeout(() => {
+    console.log("timeout")
+  updateText(joueur,"");
+}, "5000");
+
 });
 
 app.listen(port, () => {

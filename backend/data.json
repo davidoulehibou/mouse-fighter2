@@ -9,18 +9,21 @@
     "status": "off",
     "color": "blue",
     "x": 0,
+
     "y": 0
   },
   "joueur3": {
     "status": "off",
     "color": "yellow",
     "x": 0,
-    "y": 0
+    "y": 0,
+    "text": ""
   },
   "joueur4": {
     "status": "off",
     "color": "green",
     "x": 0,
+
     "y": 0
   },
   "joueur5": {
