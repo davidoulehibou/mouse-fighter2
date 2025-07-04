@@ -1,30 +1,58 @@
 {
   "joueur1": {
-    "status": "61197",
+    "status": "65185",
     "color": "red",
-    "x": 0.3788546255506608,
-    "y": 0.8810810810810811,
+    "x": 1.325678496868476,
+    "y": 0.004357298474945534,
     "text": ""
   },
   "joueur2": {
-    "status": "66929",
+    "status": "off",
     "color": "blue",
-    "x": 0.46916299559471364,
-    "y": 0.4897297297297297,
+    "x": 0,
+    "y": 0,
     "text": ""
   },
   "joueur3": {
-    "status": "35818",
+    "status": "off",
     "color": "yellow",
-    "x": 0.4318766066838046,
-    "y": 0.21621621621621623,
+    "x": 0,
+    "y": 0,
     "text": ""
   },
   "joueur4": {
-    "status": "68848",
+    "status": "off",
     "color": "green",
-    "x": 0.6426735218508998,
-    "y": 0.006486486486486486,
+    "x": 0,
+    "y": 0,
+    "text": ""
+  },
+  "joueur5": {
+    "status": "off",
+    "color": "orange",
+    "x": 0,
+    "y": 0,
+    "text": ""
+  },
+  "joueur6": {
+    "status": "off",
+    "color": "purple",
+    "x": 0,
+    "y": 0,
+    "text": ""
+  },
+  "joueur7": {
+    "status": "off",
+    "color": "cyan",
+    "x": 0,
+    "y": 0,
+    "text": ""
+  },
+  "joueur8": {
+    "status": "off",
+    "color": "grey",
+    "x": 0,
+    "y": 0,
     "text": ""
   }
 }
