@@ -1,15 +1,27 @@
-import React, { useState} from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const TextInput = ({ joueur }) => {
   const [text, setText] = useState("");
+  const inputRef = useRef(null);
+  
 
+  useEffect(() => {
+    const handleGlobalKeyDown = () => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleGlobalKeyDown);
+    };
+  }, []);
 
   const handleKeyDown = async (event) => {
-
-    
-
     if (event.key === "Enter") {
-      console.log(`Entrée pressée`);
+      console.log("Entrée pressée");
       setText("");
       try {
         await fetch(
@@ -29,6 +41,8 @@ const TextInput = ({ joueur }) => {
 
   return (
     <input
+    className="chat"
+      ref={inputRef}
       type="text"
       value={text}
       placeholder={joueur}

@@ -3,7 +3,7 @@ import "./App.css";
 import Canvas from "./Canvas";
 import TextInput from "./TextInput";
 
-function App() {
+function App({ pseudo, handleNewPseudo }) {
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -13,10 +13,6 @@ function App() {
     x: 0,
     y: 0,
   });
-
-  const [randId, setRandId] = useState(
-    Math.floor(Math.random() * 89999) + 10000
-  );
 
   const [numJoueur, setNumJoueur] = useState(0);
 
@@ -46,7 +42,7 @@ function App() {
             setNumJoueur(key);
             hasSetNumJoueur.current = true;
             console.log("numJoueur défini:", key);
-            handleSetX(key, 0, 0, randId);
+            handleSetX(key, 0, 0, pseudo);
             break;
           }
         }
@@ -63,13 +59,13 @@ function App() {
 
     // Ajout pour gérer unload / refresh / fermeture d’onglet
     const handleBeforeUnload = () => {
-      socket.close(4000, randId.toString());
+      socket.close(4000, pseudo.toString());
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      socket.close(4000, randId.toString());
+      socket.close(4000, pseudo.toString());
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
@@ -105,7 +101,7 @@ function App() {
       numJoueur,
       mousePosition.x / windowSize.width,
       mousePosition.y / windowSize.height,
-      randId
+      pseudo
     );
   }, [windowSize, mousePosition]);
 
@@ -125,7 +121,18 @@ function App() {
 
   return (
     <div style={{ position: "relative", height: "100vh", overflow: "hidden" }}>
-      <Canvas positions={positions} windowSize={windowSize} playerId={randId} mousePosition={mousePosition}/>
+      <Canvas
+        positions={positions}
+        windowSize={windowSize}
+        playerId={pseudo}
+        mousePosition={mousePosition}
+      />
+      <button
+        onClick={() => handleNewPseudo(numJoueur)}
+        style={{ position: "absolute", zIndex: "1000" }}
+      >
+        Changer de pseudo
+      </button>
       <div style={{ position: "relative", zIndex: 1, padding: "1rem" }}>
         <h1>{numJoueur}</h1>
         <p>
@@ -134,7 +141,7 @@ function App() {
             .filter((joueur) => positions[joueur].status !== "off")
             .map((joueur) => (
               <span key={joueur}>
-                {joueur}: {positions[joueur].color}{" "}
+                {joueur}: {positions[joueur].status}{" "}
               </span>
             ))}
         </p>
@@ -149,7 +156,7 @@ function App() {
           {mousePosition.y / windowSize.height}px
         </p>
       </div>
-      <TextInput joueur={numJoueur}/>
+      <TextInput joueur={numJoueur} />
     </div>
   );
 }

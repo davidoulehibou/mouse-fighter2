@@ -11,27 +11,32 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
     }
   }, [windowSize]);
 
-  function drawSpeechBubble(ctx, text, x, y) {
+  function drawSpeechBubble(ctx, text, x, y, color, name) {
     ctx.font = "20px Arial";
 
     const padding = 10;
     const textMetrics = ctx.measureText(text);
     const textWidth = textMetrics.width;
     const textHeight = 20;
-    const radius = 20
-    const bullewidth = x + textWidth + padding*2
-    const bulleheight = y - textHeight - padding*1.5
+    const radius = 20;
+    const bullewidth = x + textWidth + padding * 2;
+    const bulleheight = y - textHeight - padding * 1.5;
 
     ctx.beginPath();
 
     // Top left corner to top right
     ctx.moveTo(x, y);
-    ctx.lineTo(bullewidth - radius , y);
-    ctx.quadraticCurveTo(bullewidth, y, bullewidth,  y - radius)
-    ctx.lineTo(bullewidth , bulleheight+radius );
-    ctx.quadraticCurveTo(bullewidth, bulleheight, bullewidth - radius, bulleheight)
-    ctx.lineTo(x+radius, bulleheight );
-    ctx.quadraticCurveTo(x, bulleheight, x, bulleheight+radius)
+    ctx.lineTo(bullewidth - radius, y);
+    ctx.quadraticCurveTo(bullewidth, y, bullewidth, y - radius);
+    ctx.lineTo(bullewidth, bulleheight + radius);
+    ctx.quadraticCurveTo(
+      bullewidth,
+      bulleheight,
+      bullewidth - radius,
+      bulleheight
+    );
+    ctx.lineTo(x + radius, bulleheight);
+    ctx.quadraticCurveTo(x, bulleheight, x, bulleheight + radius);
     ctx.lineTo(x, y);
 
     ctx.closePath();
@@ -41,9 +46,30 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
     ctx.lineWidth = 2;
     ctx.fill();
 
-    // Text
+    ctx.font = "12px Arial";
+    ctx.fillStyle = color;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText(name.charAt(0).toUpperCase() + String(name).slice(1), x + padding, y - 30);
+
+    ctx.font = "16px Arial";
     ctx.fillStyle = "#000";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
     ctx.fillText(text, x + padding, y - padding);
+  }
+
+  function drawLetter(ctx, letter, x, y) {
+    ctx.font = "16px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 5;
+    ctx.strokeText(letter, x, y);
+
+    ctx.fillStyle = "black";
+    ctx.fillText(letter, x, y);
   }
 
   useEffect(() => {
@@ -69,18 +95,26 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
         );
         if (status !== "off") {
           ctx.fillStyle = color;
+          ctx.fill();
+          drawLetter(
+            ctx,
+            status.charAt(0).toUpperCase(),
+            x * windowSize.width,
+            y * windowSize.height
+          );
         } else {
           ctx.fillStyle = "rgba(255,255,255,0)";
+          ctx.fill();
         }
-
-        ctx.fill();
 
         if (text != "") {
           drawSpeechBubble(
             ctx,
             text,
             x * windowSize.width + 20,
-            y * windowSize.height - 20
+            y * windowSize.height - 20,
+            color,
+            status
           );
         }
       } else {
@@ -88,17 +122,26 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
         ctx.arc(mousePosition.x, mousePosition.y, 20, 0, 2 * Math.PI);
         if (status !== "off") {
           ctx.fillStyle = color;
+          ctx.fill();
+          drawLetter(
+            ctx,
+            status.charAt(0).toUpperCase(),
+            mousePosition.x,
+            mousePosition.y
+          );
         } else {
           ctx.fillStyle = "rgba(255,255,255,0)";
+          ctx.fill();
         }
-        ctx.fill();
 
         if (text != "") {
           drawSpeechBubble(
             ctx,
             text,
             mousePosition.x + 20,
-            mousePosition.y - 20
+            mousePosition.y - 20,
+            color,
+            status
           );
         }
       }

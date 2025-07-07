@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors"); // ✅ importer cors
 const fs = require("fs");
+const path = require("path");
 const WebSocket = require("ws");
 
 const app = express();
@@ -11,29 +12,57 @@ app.use(cors()); // ✅ autorise toutes les origines (par défaut)
 // WebSocket
 const wss = new WebSocket.Server({ port: 8080 });
 
-// Fonction pour lire/écrire le JSON
+const writeQueue = [];
 let isWriting = false;
 
-function updateContentByX(joueur, x, y, status) {
-  if (isWriting) {
-    return;
-  }
+function processQueue() {
+  if (isWriting || writeQueue.length === 0) return;
 
   isWriting = true;
+  const { data, resolve, reject } = writeQueue.shift();
 
+  fs.writeFile(
+    path.join(__dirname, "data.json"),
+    JSON.stringify(data, null, 2),
+    "utf8",
+    (err) => {
+      isWriting = false;
+
+      if (err) {
+        console.error("Erreur d'écriture:", err);
+        reject(err);
+      } else {
+        resolve();
+      }
+
+      // Appel récursif pour traiter le prochain élément
+      processQueue();
+    }
+  );
+}
+
+function writeData(data) {
+  return new Promise((resolve, reject) => {
+    writeQueue.push({ data, resolve, reject });
+    processQueue(); // Lance le traitement si ce n'est pas déjà en cours
+  });
+}
+
+function updateContentByX(joueur, x, y, status) {
   fs.readFile("./data.json", "utf8", (err, data) => {
     if (err) {
       console.error("Erreur de lecture:", err);
-      isWriting = false;
+
       return;
     }
 
     let jsonData;
     try {
       jsonData = JSON.parse(data);
+      
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
-      isWriting = false;
+
       return;
     }
 
@@ -43,44 +72,27 @@ function updateContentByX(joueur, x, y, status) {
       jsonData[joueur].status = status;
     } else {
       console.warn(`Le joueur "${joueur}" n'existe pas dans le fichier.`);
-      isWriting = false;
+
       return;
     }
 
-    fs.writeFile(
-      "./data.json",
-      JSON.stringify(jsonData, null, 2),
-      "utf8",
-      (writeErr) => {
-        if (writeErr) {
-          console.error("Erreur d'écriture:", writeErr);
-        }
-        isWriting = false;
-      }
-    );
+    writeData(jsonData);
   });
 }
 
 function updateText(joueur, text) {
-  if (isWriting) {
-    return;
-  }
-
-  isWriting = true;
-
   fs.readFile("./data.json", "utf8", (err, data) => {
     if (err) {
       console.error("Erreur de lecture:", err);
-      isWriting = false;
       return;
     }
 
     let jsonData;
+
     try {
       jsonData = JSON.parse(data);
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
-      isWriting = false;
       return;
     }
 
@@ -88,21 +100,10 @@ function updateText(joueur, text) {
       jsonData[joueur].text = text;
     } else {
       console.warn(`Le joueur "${joueur}" n'existe pas dans le fichier.`);
-      isWriting = false;
       return;
     }
 
-    fs.writeFile(
-      "./data.json",
-      JSON.stringify(jsonData, null, 2),
-      "utf8",
-      (writeErr) => {
-        if (writeErr) {
-          console.error("Erreur d'écriture:", writeErr);
-        }
-        isWriting = false;
-      }
-    );
+    writeData(jsonData);
   });
 }
 
@@ -134,13 +135,10 @@ wss.on("connection", (ws) => {
   });
 });
 
-function deconnect(id, x, y, status) {
-  isWriting = true;
-
+function deconnect(id) {
   fs.readFile("./data.json", "utf8", (err, data) => {
     if (err) {
       console.error("Erreur de lecture:", err);
-      isWriting = false;
       return;
     }
 
@@ -149,7 +147,6 @@ function deconnect(id, x, y, status) {
       jsonData = JSON.parse(data);
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
-      isWriting = false;
       return;
     }
 
@@ -169,18 +166,7 @@ function deconnect(id, x, y, status) {
       jsonData[joueursInfos.nom].y = 0;
     }
 
-
-    fs.writeFile(
-      "./data.json",
-      JSON.stringify(jsonData, null, 2),
-      "utf8",
-      (writeErr) => {
-        if (writeErr) {
-          console.error("Erreur d'écriture:", writeErr);
-        }
-        isWriting = false;
-      }
-    );
+    writeData(jsonData);
   });
 }
 
@@ -205,19 +191,114 @@ app.get("/api/set-x", (req, res) => {
   res.send({ success: true, x, y });
 });
 
+app.get("/api/isplayerexist", (req, res) => {
+  const name = req.query.name;
+
+  fs.readFile("./data.json", "utf8", (err, data) => {
+    if (err) {
+      console.error("Erreur de lecture:", err);
+      return res.status(500).json({ error: "Erreur de lecture du fichier" });
+    }
+
+    let jsonData;
+    try {
+      jsonData = JSON.parse(data);
+    } catch (parseErr) {
+      console.error("Erreur de parsing JSON:", parseErr);
+      return res.status(500).json({ error: "Erreur de parsing JSON" });
+    }
+
+    // Recherche d’un joueur dont le status est égal à name
+    const matchingKey = Object.keys(jsonData).find(
+      (key) => jsonData[key].status === name
+    );
+
+    if (matchingKey) {
+      // Joueur trouvé
+      res.json({
+        exists: true,
+        joueur: matchingKey,
+        data: jsonData[matchingKey],
+      });
+    } else {
+      // Aucun joueur avec ce status
+      res.json({ exists: false });
+    }
+  });
+});
 
 app.get("/api/settext", (req, res) => {
   const joueur = req.query.joueur;
   const text = req.query.text;
 
+  if (text == "/reset") {
+    writeData({
+      joueur1: {
+        status: "off",
+        color: "red",
+        x: 0,
+        y: 0,
+        text: "",
+      },
+      joueur2: {
+        status: "off",
+        color: "blue",
+        x: 0,
+        y: 0,
+        text: "",
+      },
+      joueur3: {
+        status: "off",
+        color: "yellow",
+        x: 0,
+        y: 0,
+        text: "",
+      },
+      joueur4: {
+        status: "off",
+        color: "green",
+        x: 0,
+        y: 0,
+        text: "",
+      },
+      joueur5: {
+        status: "off",
+        color: "white",
+        x: 0,
+        y: 0,
+        text: "",
+      },
+      joueur6: {
+        status: "off",
+        color: "orange",
+        x: 0,
+        y: 0,
+        text: "",
+      },
+      joueur7: {
+        status: "off",
+        color: "violet",
+        x: 0,
+        y: 0,
+        text: "",
+      },
+      joueur8: {
+        status: "off",
+        color: "grey",
+        x: 0,
+        y: 0,
+        text: "",
+      },
+    });
+    return;
+  }
 
-  updateText(joueur,text);
+  updateText(joueur, text);
 
   setTimeout(() => {
-    console.log("timeout")
-  updateText(joueur,"");
-}, "5000");
-
+    console.log("timeout");
+    updateText(joueur, "");
+  }, "5000");
 });
 
 app.listen(port, () => {
