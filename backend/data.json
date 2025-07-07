@@ -1,9 +1,9 @@
 {
   "joueur1": {
-    "status": "prout",
+    "status": "off",
     "color": "red",
-    "x": 0.639102564102564,
-    "y": 0.008639308855291577,
+    "x": 0,
+    "y": 0,
     "text": ""
   },
   "joueur2": {
