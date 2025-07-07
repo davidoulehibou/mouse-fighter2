@@ -50,7 +50,11 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
     ctx.fillStyle = color;
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
-    ctx.fillText(name.charAt(0).toUpperCase() + String(name).slice(1), x + padding, y - 30);
+    ctx.fillText(
+      name.charAt(0).toUpperCase() + String(name).slice(1),
+      x + padding,
+      y - 30
+    );
 
     ctx.font = "16px Arial";
     ctx.fillStyle = "#000";
@@ -59,7 +63,12 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
     ctx.fillText(text, x + padding, y - padding);
   }
 
-  function drawLetter(ctx, letter, x, y) {
+  function drawPlayer(ctx, letter, x, y, color) {
+    ctx.beginPath();
+    ctx.arc(x, y, 20, 0, 2 * Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+
     ctx.font = "16px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -84,66 +93,23 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
     Object.keys(positions).forEach((joueur) => {
       const { x, y, color, status, text } = positions[joueur];
 
+      let posx;
+      let posy;
+
       if (status != playerId) {
-        ctx.beginPath();
-        ctx.arc(
-          x * windowSize.width,
-          y * windowSize.height,
-          20,
-          0,
-          2 * Math.PI
-        );
-        if (status !== "off") {
-          ctx.fillStyle = color;
-          ctx.fill();
-          drawLetter(
-            ctx,
-            status.charAt(0).toUpperCase(),
-            x * windowSize.width,
-            y * windowSize.height
-          );
-        } else {
-          ctx.fillStyle = "rgba(255,255,255,0)";
-          ctx.fill();
-        }
-
-        if (text != "") {
-          drawSpeechBubble(
-            ctx,
-            text,
-            x * windowSize.width + 20,
-            y * windowSize.height - 20,
-            color,
-            status
-          );
-        }
+        posx = x * windowSize.width;
+        posy = y * windowSize.height;
       } else {
-        ctx.beginPath();
-        ctx.arc(mousePosition.x, mousePosition.y, 20, 0, 2 * Math.PI);
-        if (status !== "off") {
-          ctx.fillStyle = color;
-          ctx.fill();
-          drawLetter(
-            ctx,
-            status.charAt(0).toUpperCase(),
-            mousePosition.x,
-            mousePosition.y
-          );
-        } else {
-          ctx.fillStyle = "rgba(255,255,255,0)";
-          ctx.fill();
-        }
+        posx = mousePosition.x;
+        posy = mousePosition.y;
+      }
 
-        if (text != "") {
-          drawSpeechBubble(
-            ctx,
-            text,
-            mousePosition.x + 20,
-            mousePosition.y - 20,
-            color,
-            status
-          );
-        }
+      if (status !== "off") {
+        drawPlayer(ctx, status.charAt(0).toUpperCase(), posx, posy, color);
+      }
+
+      if (text != "") {
+        drawSpeechBubble(ctx, text, posx + 20, posy - 20, color, status);
       }
     });
   }, [positions, windowSize, mousePosition]);
