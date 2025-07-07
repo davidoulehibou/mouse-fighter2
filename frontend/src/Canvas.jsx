@@ -65,20 +65,27 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
 
   function drawPlayer(ctx, letter, x, y, color) {
     ctx.beginPath();
-    ctx.arc(x, y, 20, 0, 2 * Math.PI);
-    ctx.fillStyle = color;
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y + 18);
+
+
+    ctx.lineTo(x + 7, y + 13);
+    ctx.lineTo(x + 13, y + 13);
+    ctx.lineTo(x, y);
+    ctx.fillStyle = 'white';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
     ctx.fill();
 
     ctx.font = "16px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-
     ctx.strokeStyle = "white";
     ctx.lineWidth = 5;
-    ctx.strokeText(letter, x, y);
-
-    ctx.fillStyle = "black";
-    ctx.fillText(letter, x, y);
+    ctx.strokeText(letter, x+12, y+25);
+    ctx.fillStyle = color;
+    ctx.fillText(letter, x+12, y+25);
   }
 
   useEffect(() => {
@@ -109,7 +116,7 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
       }
 
       if (text != "") {
-        drawSpeechBubble(ctx, text, posx + 20, posy - 20, color, status);
+        drawSpeechBubble(ctx, text, posx, posy-10, color, status);
       }
     });
   }, [positions, windowSize, mousePosition]);
