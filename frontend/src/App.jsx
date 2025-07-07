@@ -130,31 +130,29 @@ function App({ pseudo, handleNewPseudo }) {
       <button
         onClick={() => handleNewPseudo(numJoueur)}
         style={{ position: "absolute", zIndex: "1000" }}
+        className="bouton"
       >
         Changer de pseudo
       </button>
       <div style={{ position: "relative", zIndex: 1, padding: "1rem" }}>
-        <h1>{numJoueur}</h1>
-        <p>
-          joueurs en ligne :{" "}
+        {Object.keys(positions)
+          .filter((joueur) => positions[joueur].status == pseudo)
+          .map((joueur) => (
+            <h1 style={{color:`${positions[joueur].color}`}}>
+              {pseudo.charAt(0).toUpperCase() + String(pseudo).slice(1)}
+            </h1>
+          ))}
+          <ul>
+            Joueurs:
           {Object.keys(positions)
             .filter((joueur) => positions[joueur].status !== "off")
             .map((joueur) => (
-              <span key={joueur}>
-                {joueur}: {positions[joueur].status}{" "}
-              </span>
+              <li key={joueur} style={{color:`${positions[joueur].color}`}}>
+                {positions[joueur].status.charAt(0).toUpperCase() + String(positions[joueur].status).slice(1)}
+              </li>
             ))}
-        </p>
+            </ul>
 
-        <p>Largeur : {windowSize.width}px</p>
-        <p>Hauteur : {windowSize.height}px</p>
-        <p>
-          Position souris : X = {mousePosition.x}px, Y = {mousePosition.y}px
-        </p>
-        <p>
-          Position relatives : X = {mousePosition.x / windowSize.width}px, Y ={" "}
-          {mousePosition.y / windowSize.height}px
-        </p>
       </div>
       <TextInput joueur={numJoueur} />
     </div>

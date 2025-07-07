@@ -12,7 +12,7 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
   }, [windowSize]);
 
   function drawSpeechBubble(ctx, text, x, y, color, name) {
-    ctx.font = "20px Arial";
+    ctx.font = "16px Arial";
 
     const padding = 10;
     const textMetrics = ctx.measureText(text);
@@ -21,6 +21,8 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
     const radius = 20;
     const bullewidth = x + textWidth + padding * 2;
     const bulleheight = y - textHeight - padding * 1.5;
+
+    console.log(textWidth, bullewidth)
 
     ctx.beginPath();
 
@@ -45,6 +47,10 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
     ctx.fillStyle = "rgb(255,255,255,0.5";
     ctx.lineWidth = 2;
     ctx.fill();
+    ctx.fillStyle = "#000";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText(text, x + padding, y - padding);
 
     ctx.font = "12px Arial";
     ctx.fillStyle = color;
@@ -56,11 +62,7 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
       y - 30
     );
 
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#000";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "alphabetic";
-    ctx.fillText(text, x + padding, y - padding);
+    
   }
 
   function drawPlayer(ctx, letter, x, y, color) {
@@ -68,11 +70,10 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
     ctx.moveTo(x, y);
     ctx.lineTo(x, y + 18);
 
-
     ctx.lineTo(x + 7, y + 13);
     ctx.lineTo(x + 13, y + 13);
     ctx.lineTo(x, y);
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = "white";
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.stroke();
@@ -83,9 +84,9 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
     ctx.textBaseline = "middle";
     ctx.strokeStyle = "white";
     ctx.lineWidth = 5;
-    ctx.strokeText(letter, x+12, y+25);
+    ctx.strokeText(letter, x + 12, y + 25);
     ctx.fillStyle = color;
-    ctx.fillText(letter, x+12, y+25);
+    ctx.fillText(letter, x + 12, y + 25);
   }
 
   useEffect(() => {
@@ -116,7 +117,7 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
       }
 
       if (text != "") {
-        drawSpeechBubble(ctx, text, posx, posy-10, color, status);
+        drawSpeechBubble(ctx, text, posx, posy - 10, color, status);
       }
     });
   }, [positions, windowSize, mousePosition]);

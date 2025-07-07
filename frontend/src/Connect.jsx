@@ -41,7 +41,7 @@ function Connect({ handlePseudo }) {
         onChange={(e) => setPseudo(e.target.value)}
         placeholder="Entrez votre pseudo"
       />
-      <button type="submit" className="connecter">Se connecter</button>
+      <button type="submit" className="bouton">Se connecter</button>
       {loading && <>Chargement</>}
       {exists == true && <p>le joueur existe déjà</p>}
     </form>
