@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import TextInput from "./TextInput";
 
 const Canvas = ({ positions, playerId }) => {
   const canvasRef = useRef(null);
+
+  const [numJoueur, setNumJoueur] = useState(null)
+
 
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -40,12 +44,17 @@ const Canvas = ({ positions, playerId }) => {
   }, []);
 
   useEffect(() => {
-    let numJoueur = null;
-    Object.keys(positions).forEach((joueur) => {
+
+    if(playerId){
+      Object.keys(positions).forEach((joueur) => {
       if (positions[joueur].status == playerId) {
-        numJoueur = joueur;
+        setNumJoueur(joueur);
       }
     });
+    }else{
+      setNumJoueur(null);
+    }
+    
 
     if (numJoueur) {
       handleSetX(
@@ -55,7 +64,7 @@ const Canvas = ({ positions, playerId }) => {
         playerId
       );
     }
-  }, [windowSize, mousePosition]);
+  }, [windowSize, mousePosition, playerId]);
 
   const handleSetX = async (joueur, x, y, status) => {
     if (playerId) {
@@ -189,6 +198,7 @@ const Canvas = ({ positions, playerId }) => {
   }, [positions, windowSize, mousePosition]);
 
   return (
+    <>
     <canvas
       ref={canvasRef}
       style={{
@@ -198,6 +208,9 @@ const Canvas = ({ positions, playerId }) => {
         backgroundColor: "#b9dbff",
       }}
     />
+    {numJoueur && <TextInput joueur={numJoueur} />}
+    
+    </>
   );
 };
 

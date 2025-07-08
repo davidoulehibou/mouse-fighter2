@@ -1,6 +1,6 @@
 {
   "joueur1": {
-    "status": "osdfjdsfff",
+    "status": "off",
     "color": "red",
     "x": 0,
     "y": 0,
@@ -14,28 +14,28 @@
     "text": ""
   },
   "joueur3": {
-    "status": "ghgfserqdsdfsdf",
+    "status": "off",
     "color": "yellow",
     "x": 0,
     "y": 0,
     "text": ""
   },
   "joueur4": {
-    "status": "qdfgqdfg",
+    "status": "sfgnsnn",
     "color": "green",
-    "x": 0,
-    "y": 0,
+    "x": 0.34739583333333335,
+    "y": 0.018378378378378378,
     "text": ""
   },
   "joueur5": {
-    "status": "qdfgh",
+    "status": "off",
     "color": "white",
     "x": 0,
     "y": 0,
     "text": ""
   },
   "joueur6": {
-    "status": "qdfhqdfh",
+    "status": "off",
     "color": "orange",
     "x": 0,
     "y": 0,

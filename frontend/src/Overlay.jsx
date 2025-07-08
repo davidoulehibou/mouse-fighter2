@@ -12,7 +12,7 @@ function Overlay({handleNewPseudo}) {
       >
         Changer de pseudo
       </button>
-      <TextInput joueur={numJoueur} />
+      
     </div>
   );
 }
