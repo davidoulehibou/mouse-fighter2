@@ -1,7 +1,75 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
+const Canvas = ({ positions, playerId }) => {
   const canvasRef = useRef(null);
+
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  const [mousePosition, setMousePosition] = useState({
+    x: 0,
+    y: 0,
+  });
+
+  useEffect(() => {
+    // Mettre à jour la taille de la fenêtre
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    // Mettre à jour la position de la souris
+    const handleMouseMove = (event) => {
+      setMousePosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
+  useEffect(() => {
+    let numJoueur = null;
+    Object.keys(positions).forEach((joueur) => {
+      if (positions[joueur].status == playerId) {
+        numJoueur = joueur;
+      }
+    });
+
+    if (numJoueur) {
+      handleSetX(
+        numJoueur,
+        mousePosition.x / windowSize.width,
+        mousePosition.y / windowSize.height,
+        playerId
+      );
+    }
+  }, [windowSize, mousePosition]);
+
+  const handleSetX = async (joueur, x, y, status) => {
+    if (playerId) {
+      try {
+        await fetch(
+          `${
+            import.meta.env.VITE_URL
+          }/api/set-x?joueur=${joueur}&x=${x}&y=${y}&status=${status}`
+        );
+      } catch (err) {
+        console.error("Erreur appel HTTP:", err);
+      }
+    }
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -22,7 +90,7 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
     const bullewidth = x + textWidth + padding * 2;
     const bulleheight = y - textHeight - padding * 1.5;
 
-    console.log(textWidth, bullewidth)
+    console.log(textWidth, bullewidth);
 
     ctx.beginPath();
 
@@ -61,8 +129,6 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
       x + padding,
       y - 30
     );
-
-    
   }
 
   function drawPlayer(ctx, letter, x, y, color) {
@@ -107,7 +173,7 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
       if (status != playerId) {
         posx = x * windowSize.width;
         posy = y * windowSize.height;
-      } else {
+      } else if (mousePosition) {
         posx = mousePosition.x;
         posy = mousePosition.y;
       }
@@ -129,7 +195,6 @@ const Canvas = ({ positions, windowSize, playerId, mousePosition }) => {
         position: "absolute",
         top: 0,
         left: 0,
-        zIndex: 0,
         backgroundColor: "#b9dbff",
       }}
     />

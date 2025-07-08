@@ -12,6 +12,18 @@ app.use(cors()); // ✅ autorise toutes les origines (par défaut)
 // WebSocket
 const wss = new WebSocket.Server({ port: 8080 });
 
+setInterval(() => {
+  wss.clients.forEach((ws) => {
+    if (ws.isAlive === false) {
+      console.log("Client inactif, fermeture forcée");
+      return ws.terminate();
+    }
+
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 30000);
+
 const writeQueue = [];
 let isWriting = false;
 
@@ -59,7 +71,6 @@ function updateContentByX(joueur, x, y, status) {
     let jsonData;
     try {
       jsonData = JSON.parse(data);
-      
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
 
@@ -122,20 +133,28 @@ function broadcastJson() {
 }
 
 wss.on("connection", (ws) => {
+  ws.isAlive = true;
+
+  ws.on("pong", () => {
+    ws.isAlive = true;
+  });
+
+  // ton code existant ici :
   fs.readFile("./data.json", "utf8", (err, data) => {
     if (!err) {
       try {
         ws.send(data);
       } catch {}
     }
+
     ws.on("close", (code, reason) => {
       console.log("deconnexion:", reason.toString());
-      deconnect(reason.toString(), 0, 0, "off");
+      resetPlayerStatusByName(reason.toString(), 0, 0, "off");
     });
   });
 });
 
-function deconnect(id) {
+function resetPlayerStatusByName(id) {
   fs.readFile("./data.json", "utf8", (err, data) => {
     if (err) {
       console.error("Erreur de lecture:", err);
@@ -227,6 +246,54 @@ app.get("/api/isplayerexist", (req, res) => {
   });
 });
 
+app.get("/api/createPlayer", (req, res) => {
+  const name = req.query.name;
+
+  if (!name) {
+    return res.status(400).json({ error: "Le nom du joueur est requis." });
+  }
+
+  fs.readFile("./data.json", "utf8", (err, data) => {
+    if (err) {
+      console.error("Erreur de lecture:", err);
+      return res.status(500).json({ error: "Erreur de lecture du fichier" });
+    }
+
+    let jsonData;
+    try {
+      jsonData = JSON.parse(data);
+    } catch (parseErr) {
+      console.error("Erreur de parsing JSON:", parseErr);
+      return res.status(500).json({ error: "Erreur de parsing JSON" });
+    }
+
+    // Cherche un joueur disponible (status = "off")
+    const availableKey = Object.keys(jsonData).find(
+      (key) => jsonData[key].status === "off"
+    );
+
+    if (!availableKey) {
+      return res.json({ success: false, playerSlot: null });
+    }
+
+    // Attribue les infos au joueur libre
+    jsonData[availableKey].status = name;
+    jsonData[availableKey].x = 0;
+    jsonData[availableKey].y = 0;
+    jsonData[availableKey].text = "";
+
+    // Sauvegarde
+    writeData(jsonData)
+      .then(() => {
+        res.json({ success: true, playerSlot: availableKey });
+      })
+      .catch((writeErr) => {
+        console.error("Erreur d'écriture:", writeErr);
+        res.status(500).json({ error: "Erreur d'écriture" });
+      });
+  });
+});
+
 app.get("/api/settext", (req, res) => {
   const joueur = req.query.joueur;
   const text = req.query.text;
@@ -289,7 +356,7 @@ app.get("/api/settext", (req, res) => {
         y: 0,
         text: "",
       },
-    });
+    }).then(() => res.send({ success: true }));
     return;
   }
 

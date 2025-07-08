@@ -1,50 +1,32 @@
 import { useState } from "react";
 
-function Connect({ handlePseudo }) {
+function Connect({ handlePseudo, error }) {
   const [pseudo, setPseudo] = useState("");
-  const [exists, setExists] = useState(null); // null = pas encore testé
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!pseudo.trim()) return;
-
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_URL
-        }/api/isplayerexist?name=${pseudo.toLowerCase()}`
-      );
-      const text = await response.text();
-      console.log("Contenu brut de la réponse :", text);
-
-      const result = JSON.parse(text);
-      if(!result.exists){
-        handlePseudo(pseudo.toLowerCase())
-      }
-      setExists(true);
-    } catch (err) {
-      console.error("Erreur lors de l'appel API:", err);
-      setExists(null);
-    } finally {
-      setLoading(false);
-    }
+    handlePseudo(pseudo.toLowerCase());
+     
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-      className="pseudo"
-        type="text"
-        value={pseudo}
-        onChange={(e) => setPseudo(e.target.value)}
-        placeholder="Entrez votre pseudo"
-      />
-      <button type="submit" className="bouton">Se connecter</button>
-      {loading && <>Chargement</>}
-      {exists == true && <p>le joueur existe déjà</p>}
-    </form>
+    <div className="from-fond">
+      <form onSubmit={handleSubmit}>
+        <input
+          className="pseudo"
+          type="text"
+          value={pseudo}
+          onChange={(e) => setPseudo(e.target.value)}
+          placeholder="Entrez votre pseudo"
+        />
+        <button type="submit" className="bouton">
+          Se connecter
+        </button>
+        {error == "exists" && <p>le joueur existe déjà</p>}
+        {error == "full" && <p>Il y a déjà trop de monde</p>}
+      </form>
+    </div>
   );
 }
 
