@@ -21,10 +21,10 @@
     "text": ""
   },
   "joueur4": {
-    "status": "sfgnsnn",
+    "status": "off",
     "color": "green",
-    "x": 0.34739583333333335,
-    "y": 0.018378378378378378,
+    "x": 0,
+    "y": 0,
     "text": ""
   },
   "joueur5": {

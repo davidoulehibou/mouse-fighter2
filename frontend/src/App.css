@@ -65,7 +65,7 @@ form {
   transition: background-color 0.2s;
 }
 
-.connecter:hover {
+.bouton:hover {
   background-color: #1565c0;
 }
 
