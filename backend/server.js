@@ -3,6 +3,7 @@ const cors = require("cors"); // ✅ importer cors
 const fs = require("fs");
 const path = require("path");
 const WebSocket = require("ws");
+const { json } = require("stream/consumers");
 
 const app = express();
 const port = 3000;
@@ -299,74 +300,98 @@ app.get("/api/settext", (req, res) => {
   const text = req.query.text;
 
   if (text == "/reset") {
-    writeData({
-      joueur1: {
-        status: "off",
-        color: "red",
-        x: 0,
-        y: 0,
-        text: "",
-      },
-      joueur2: {
-        status: "off",
-        color: "blue",
-        x: 0,
-        y: 0,
-        text: "",
-      },
-      joueur3: {
-        status: "off",
-        color: "yellow",
-        x: 0,
-        y: 0,
-        text: "",
-      },
-      joueur4: {
-        status: "off",
-        color: "green",
-        x: 0,
-        y: 0,
-        text: "",
-      },
-      joueur5: {
-        status: "off",
-        color: "white",
-        x: 0,
-        y: 0,
-        text: "",
-      },
-      joueur6: {
-        status: "off",
-        color: "orange",
-        x: 0,
-        y: 0,
-        text: "",
-      },
-      joueur7: {
-        status: "off",
-        color: "violet",
-        x: 0,
-        y: 0,
-        text: "",
-      },
-      joueur8: {
-        status: "off",
-        color: "grey",
-        x: 0,
-        y: 0,
-        text: "",
-      },
-    }).then(() => res.send({ success: true }));
+    resetPlayers().then(() => res.send({ success: true }));
     return;
   }
 
   updateText(joueur, text);
 
+  console.log(text)
+
   setTimeout(() => {
-    console.log("timeout");
-    updateText(joueur, "");
+    fs.readFile("./data.json", "utf8", (err, data) => {
+      if (err) {
+        console.error("Erreur de lecture:", err);
+        return res.status(500).json({ error: "Erreur de lecture du fichier" });
+      }
+
+      let jsonData;
+      try {
+        jsonData = JSON.parse(data);
+      } catch (parseErr) {
+        console.error("Erreur de parsing JSON:", parseErr);
+        return res.status(500).json({ error: "Erreur de parsing JSON" });
+      }
+      console.log(jsonData[joueur]);
+      console.log(text)
+      if (jsonData[joueur].text == text) {
+        console.log("timeout");
+        updateText(joueur, "");
+      }
+    });
   }, "5000");
 });
+
+function resetPlayers() {
+  writeData({
+    joueur1: {
+      status: "off",
+      color: "red",
+      x: 0,
+      y: 0,
+      text: "",
+    },
+    joueur2: {
+      status: "off",
+      color: "blue",
+      x: 0,
+      y: 0,
+      text: "",
+    },
+    joueur3: {
+      status: "off",
+      color: "yellow",
+      x: 0,
+      y: 0,
+      text: "",
+    },
+    joueur4: {
+      status: "off",
+      color: "green",
+      x: 0,
+      y: 0,
+      text: "",
+    },
+    joueur5: {
+      status: "off",
+      color: "white",
+      x: 0,
+      y: 0,
+      text: "",
+    },
+    joueur6: {
+      status: "off",
+      color: "orange",
+      x: 0,
+      y: 0,
+      text: "",
+    },
+    joueur7: {
+      status: "off",
+      color: "violet",
+      x: 0,
+      y: 0,
+      text: "",
+    },
+    joueur8: {
+      status: "off",
+      color: "grey",
+      x: 0,
+      y: 0,
+      text: "",
+    },
+  });
+}
 
 app.listen(port, () => {
   console.log(`Serveur HTTP sur http://localhost:${port}`);
