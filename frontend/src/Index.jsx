@@ -130,7 +130,7 @@ function Index() {
   return (
     <>
       <Canvas positions={positions} playerId={pseudo} />
-      <PlayerList positions={positions}/>
+      <PlayerList positions={positions} pseudo={pseudo}/>
 
       {!error && pseudo ? (
         <Overlay handleNewPseudo={handleNewPseudo} positions={positions} />

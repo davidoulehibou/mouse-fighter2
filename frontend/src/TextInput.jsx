@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const TextInput = ({ joueur }) => {
+const TextInput = ({ joueur, name }) => {
   const [text, setText] = useState("");
   const inputRef = useRef(null);
   
@@ -40,15 +40,18 @@ const TextInput = ({ joueur }) => {
   };
 
   return (
-    <input
+    <>{name && <input
     className="chat"
       ref={inputRef}
       type="text"
       value={text}
-      placeholder={joueur}
+      
+      placeholder={`parler en tant que ${name.charAt(0).toUpperCase() + String(name).slice(1)}`}
       onKeyDown={handleKeyDown}
       onChange={handleText}
-    />
+    />}
+    
+    </>
   );
 };
 

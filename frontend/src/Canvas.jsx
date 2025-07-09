@@ -209,7 +209,7 @@ const Canvas = ({ positions, playerId }) => {
         backgroundColor: "#b9dbff",
       }}
     />
-    {numJoueur && <TextInput joueur={numJoueur} />}
+    {numJoueur && <TextInput joueur={numJoueur} name={playerId} />}
     
     </>
   );

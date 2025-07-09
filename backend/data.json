@@ -1,11 +1,11 @@
 {
   "joueur1": {
-    "status": "dfgdfg",
+    "status": "off",
     "color": "#ff0000",
-    "x": 0.14739583333333334,
-    "y": 0.005399568034557235,
+    "x": 0,
+    "y": 0,
     "text": "",
-    "score": -27
+    "score": 0
   },
   "joueur2": {
     "status": "off",
@@ -13,7 +13,7 @@
     "x": 0,
     "y": 0,
     "text": "",
-    "score": 3
+    "score": 0
   },
   "joueur3": {
     "status": "off",
@@ -24,15 +24,15 @@
     "score": 0
   },
   "joueur4": {
-    "status": "offghjf",
+    "status": "off",
     "color": "#008000",
     "x": 0,
     "y": 0,
     "text": "",
-    "score": 10
+    "score": 0
   },
   "joueur5": {
-    "status": "sgh",
+    "status": "off",
     "color": "#ffffff",
     "x": 0,
     "y": 0,

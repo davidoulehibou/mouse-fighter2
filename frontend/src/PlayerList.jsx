@@ -1,5 +1,4 @@
-function PlayerList({ positions }) {
-  const numJoueur = "joueur2";
+function PlayerList({ positions, pseudo }) {
 
   function getTextColor(bgColor) {
     // Supporte les couleurs en hex (#rrggbb ou #rgb)
@@ -32,17 +31,21 @@ function PlayerList({ positions }) {
   return (
     
       <ul className="player-list">
+        <h1>Leaderboard</h1>
+        
         {Object.entries(positions)
           .filter(([_, data]) => data.status !== "off")
           .sort(([, a], [, b]) => b.score - a.score)
           .map(([joueur, data]) => (
             <li key={joueur} className="player-card">
+                {console.log(pseudo,data.status )}
               <p
                 style={{
                   backgroundColor: data.color,
                   color: getTextColor(data.color),
                   padding: "4px 8px",
                   borderRadius: "4px",
+                  opacity:`${pseudo == data.status ? "0.8" : "0.4" }`
                 }}
               >
                 {data.status.charAt(0).toUpperCase() + String(data.status).slice(1)} : <span>{data.score} pts</span>
