@@ -131,7 +131,7 @@ function Index() {
       <Canvas positions={positions} playerId={pseudo} />
 
       {!error && pseudo ? (
-        <Overlay handleNewPseudo={handleNewPseudo} />
+        <Overlay handleNewPseudo={handleNewPseudo} positions={positions} />
       ) : (
         <Connect handlePseudo={handlePseudo} error={error} />
       )}

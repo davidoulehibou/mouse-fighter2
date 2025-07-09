@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors"); // ✅ importer cors
 const fs = require("fs");
 const path = require("path");
+const dataFile = path.join(__dirname, "data.json")
 const WebSocket = require("ws");
 const { json } = require("stream/consumers");
 
@@ -35,7 +36,7 @@ function processQueue() {
   const { data, resolve, reject } = writeQueue.shift();
 
   fs.writeFile(
-    path.join(__dirname, "data.json"),
+    dataFile,
     JSON.stringify(data, null, 2),
     "utf8",
     (err) => {
@@ -62,7 +63,7 @@ function writeData(data) {
 }
 
 function updateContentByX(joueur, x, y, status) {
-  fs.readFile("./data.json", "utf8", (err, data) => {
+  fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) {
       console.error("Erreur de lecture:", err);
 
@@ -93,7 +94,7 @@ function updateContentByX(joueur, x, y, status) {
 }
 
 function updateText(joueur, text) {
-  fs.readFile("./data.json", "utf8", (err, data) => {
+  fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) {
       console.error("Erreur de lecture:", err);
       return;
@@ -120,7 +121,7 @@ function updateText(joueur, text) {
 }
 
 function broadcastJson() {
-  fs.readFile("./data.json", "utf8", (err, data) => {
+  fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) return;
     try {
       const jsonData = JSON.parse(data);
@@ -141,7 +142,7 @@ wss.on("connection", (ws) => {
   });
 
   // ton code existant ici :
-  fs.readFile("./data.json", "utf8", (err, data) => {
+  fs.readFile(dataFile, "utf8", (err, data) => {
     if (!err) {
       try {
         ws.send(data);
@@ -156,7 +157,7 @@ wss.on("connection", (ws) => {
 });
 
 function resetPlayerStatusByName(id) {
-  fs.readFile("./data.json", "utf8", (err, data) => {
+  fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) {
       console.error("Erreur de lecture:", err);
       return;
@@ -190,7 +191,7 @@ function resetPlayerStatusByName(id) {
   });
 }
 
-fs.watch("./data.json", (eventType) => {
+fs.watch(dataFile, (eventType) => {
   if (eventType === "change") broadcastJson();
 });
 
@@ -214,7 +215,7 @@ app.get("/api/set-x", (req, res) => {
 app.get("/api/isplayerexist", (req, res) => {
   const name = req.query.name;
 
-  fs.readFile("./data.json", "utf8", (err, data) => {
+  fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) {
       console.error("Erreur de lecture:", err);
       return res.status(500).json({ error: "Erreur de lecture du fichier" });
@@ -254,7 +255,7 @@ app.get("/api/createPlayer", (req, res) => {
     return res.status(400).json({ error: "Le nom du joueur est requis." });
   }
 
-  fs.readFile("./data.json", "utf8", (err, data) => {
+  fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) {
       console.error("Erreur de lecture:", err);
       return res.status(500).json({ error: "Erreur de lecture du fichier" });
@@ -282,6 +283,7 @@ app.get("/api/createPlayer", (req, res) => {
     jsonData[availableKey].x = 0;
     jsonData[availableKey].y = 0;
     jsonData[availableKey].text = "";
+    jsonData[availableKey].score = 0;
 
     // Sauvegarde
     writeData(jsonData)
@@ -309,7 +311,7 @@ app.get("/api/settext", (req, res) => {
   console.log(text)
 
   setTimeout(() => {
-    fs.readFile("./data.json", "utf8", (err, data) => {
+    fs.readFile(dataFile, "utf8", (err, data) => {
       if (err) {
         console.error("Erreur de lecture:", err);
         return res.status(500).json({ error: "Erreur de lecture du fichier" });
@@ -340,6 +342,7 @@ function resetPlayers() {
       x: 0,
       y: 0,
       text: "",
+      score:0,
     },
     joueur2: {
       status: "off",
@@ -347,6 +350,7 @@ function resetPlayers() {
       x: 0,
       y: 0,
       text: "",
+      score:0,
     },
     joueur3: {
       status: "off",
@@ -354,6 +358,7 @@ function resetPlayers() {
       x: 0,
       y: 0,
       text: "",
+      score:0,
     },
     joueur4: {
       status: "off",
@@ -361,6 +366,7 @@ function resetPlayers() {
       x: 0,
       y: 0,
       text: "",
+      score:0,
     },
     joueur5: {
       status: "off",
@@ -368,6 +374,7 @@ function resetPlayers() {
       x: 0,
       y: 0,
       text: "",
+      score:0,
     },
     joueur6: {
       status: "off",
@@ -375,6 +382,7 @@ function resetPlayers() {
       x: 0,
       y: 0,
       text: "",
+      score:0,
     },
     joueur7: {
       status: "off",
@@ -382,6 +390,7 @@ function resetPlayers() {
       x: 0,
       y: 0,
       text: "",
+      score:0,
     },
     joueur8: {
       status: "off",
@@ -389,6 +398,7 @@ function resetPlayers() {
       x: 0,
       y: 0,
       text: "",
+      score:0,
     },
   });
 }

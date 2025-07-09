@@ -159,6 +159,7 @@ const Canvas = ({ positions, playerId }) => {
     ctx.textBaseline = "middle";
     ctx.strokeStyle = "white";
     ctx.lineWidth = 5;
+    ctx.lineJoin = "round";
     ctx.strokeText(letter, x + 12, y + 25);
     ctx.fillStyle = color;
     ctx.fillText(letter, x + 12, y + 25);

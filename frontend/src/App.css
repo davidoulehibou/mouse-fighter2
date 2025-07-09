@@ -69,7 +69,7 @@ form {
   background-color: #1565c0;
 }
 
-p {
+form p {
   color: green;
   margin: 0;
   font-weight: bold;
@@ -79,4 +79,14 @@ form > span,
 form > div {
   font-size: 0.9rem;
   color: #555;
+}
+
+.player-list{
+  position: absolute;
+  right: 14px;
+  text-align: end;
+}
+
+.player-list li {
+  list-style: none;
 }

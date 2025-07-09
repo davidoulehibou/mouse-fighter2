@@ -1,58 +1,66 @@
 {
   "joueur1": {
-    "status": "wdfgwfg",
-    "color": "red",
-    "x": 0.008333333333333333,
-    "y": 0.6166306695464363,
-    "text": ""
+    "status": "wdfvwxcv",
+    "color": "#ff0000",
+    "x": 0,
+    "y": 0,
+    "text": "",
+    "score": 0
   },
   "joueur2": {
-    "status": "off",
-    "color": "blue",
-    "x": 0,
-    "y": 0,
-    "text": ""
+    "status": "sdfbsf",
+    "color": "#0000ff",
+    "x": 0.6073619631901841,
+    "y": 0.0010799136069114472,
+    "text": "",
+    "score": 0
   },
   "joueur3": {
-    "status": "off",
-    "color": "yellow",
+    "status": "dgh",
+    "color": "#ffff00",
     "x": 0,
     "y": 0,
-    "text": ""
+    "text": "",
+    "score": 0
   },
   "joueur4": {
-    "status": "off",
-    "color": "green",
+    "status": "dghj",
+    "color": "#008000",
     "x": 0,
     "y": 0,
-    "text": ""
+    "text": "",
+    "score": 0
   },
   "joueur5": {
-    "status": "off",
-    "color": "white",
+    "status": "jdtyj",
+    "color": "#ffffff",
     "x": 0,
     "y": 0,
-    "text": ""
+    "text": "",
+    "score": 0
   },
   "joueur6": {
-    "status": "off",
-    "color": "orange",
+    "status": "ofqerf",
+    "color": "#ffa500",
     "x": 0,
     "y": 0,
-    "text": ""
+    "text": "",
+    "score": 0
   },
   "joueur7": {
-    "status": "off",
-    "color": "violet",
+    "status": "oftjkf",
+    "color": "#8a2be2",
     "x": 0,
     "y": 0,
-    "text": ""
+    "text": "",
+    "score": 2
   },
   "joueur8": {
-    "status": "off",
-    "color": "grey",
+    "status": "ojthjdgff",
+    "color": "#808080",
     "x": 0,
     "y": 0,
-    "text": ""
+    "text": "",
+    "score": 0
   }
 }
