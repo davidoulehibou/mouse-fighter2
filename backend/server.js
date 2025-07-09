@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors"); // ✅ importer cors
 const fs = require("fs");
 const path = require("path");
-const dataFile = path.join(__dirname, "data.json")
+const dataFile = path.join(__dirname, "data.json");
 const WebSocket = require("ws");
 const { json } = require("stream/consumers");
 
@@ -35,24 +35,19 @@ function processQueue() {
   isWriting = true;
   const { data, resolve, reject } = writeQueue.shift();
 
-  fs.writeFile(
-    dataFile,
-    JSON.stringify(data, null, 2),
-    "utf8",
-    (err) => {
-      isWriting = false;
+  fs.writeFile(dataFile, JSON.stringify(data, null, 2), "utf8", (err) => {
+    isWriting = false;
 
-      if (err) {
-        console.error("Erreur d'écriture:", err);
-        reject(err);
-      } else {
-        resolve();
-      }
-
-      // Appel récursif pour traiter le prochain élément
-      processQueue();
+    if (err) {
+      console.error("Erreur d'écriture:", err);
+      reject(err);
+    } else {
+      resolve();
     }
-  );
+
+    // Appel récursif pour traiter le prochain élément
+    processQueue();
+  });
 }
 
 function writeData(data) {
@@ -306,9 +301,42 @@ app.get("/api/settext", (req, res) => {
     return;
   }
 
+  if (text.includes("/points")) {
+    // On découpe la chaîne en mots
+    const parts = text.split(" ");
+
+    // parts[0] = "/points"
+    // parts[1] = "utilisateurX"
+    // parts[2] = "120"
+
+    const utilisateur = parts[1];
+    const points = Number(parts[2]); // convertit en nombre
+
+    console.log("Utilisateur :", utilisateur);
+    console.log("Points :", points);
+
+    if (
+      points &&
+      [
+        "joueur1",
+        "joueur2",
+        "joueur3",
+        "joueur4",
+        "joueur5",
+        "joueur6",
+        "joueur7",
+        "joueur8",
+      ].includes(utilisateur)
+    ) {
+      console.log("ajout de points")
+      addPoints(utilisateur, points);
+    }
+    return;
+  }
+
   updateText(joueur, text);
 
-  console.log(text)
+  console.log(text);
 
   setTimeout(() => {
     fs.readFile(dataFile, "utf8", (err, data) => {
@@ -324,81 +352,105 @@ app.get("/api/settext", (req, res) => {
         console.error("Erreur de parsing JSON:", parseErr);
         return res.status(500).json({ error: "Erreur de parsing JSON" });
       }
-      console.log(jsonData[joueur]);
-      console.log(text)
       if (jsonData[joueur].text == text) {
-        console.log("timeout");
         updateText(joueur, "");
       }
     });
   }, "5000");
 });
 
+function addPoints(utilisateur, points) {
+  fs.readFile(dataFile, "utf8", (err, data) => {
+    if (err) {
+      console.error("Erreur de lecture:", err);
+      return;
+    }
+
+    let jsonData;
+
+    try {
+      jsonData = JSON.parse(data);
+    } catch (parseErr) {
+      console.error("Erreur de parsing JSON:", parseErr);
+      return;
+    }
+
+    if (jsonData[utilisateur]) {
+      jsonData[utilisateur].score = jsonData[utilisateur].score + points;
+    } else {
+      console.warn(`Le joueur "${utilisateur}" n'existe pas dans le fichier.`);
+      return;
+    }
+
+    writeData(jsonData);
+  });
+}
+
 function resetPlayers() {
   writeData({
     joueur1: {
       status: "off",
-      color: "red",
+      color: "#ff0000",
       x: 0,
       y: 0,
       text: "",
-      score:0,
+      score: 0,
     },
     joueur2: {
       status: "off",
-      color: "blue",
+      color: "#0000ff",
       x: 0,
       y: 0,
       text: "",
-      score:0,
+      score: 0,
     },
     joueur3: {
       status: "off",
-      color: "yellow",
+      color: "#ffff00",
       x: 0,
       y: 0,
       text: "",
-      score:0,
+      score: 0,
     },
     joueur4: {
       status: "off",
-      color: "green",
+      color: "#008000",
       x: 0,
       y: 0,
       text: "",
-      score:0,
+      score: 0,
     },
     joueur5: {
       status: "off",
-      color: "white",
+      color: "#ffffff",
       x: 0,
       y: 0,
       text: "",
-      score:0,
+      score: 0,
     },
     joueur6: {
       status: "off",
-      color: "orange",
+      color: "#ffa500",
       x: 0,
       y: 0,
       text: "",
-      score:0,
+      score: 0,
     },
     joueur7: {
       status: "off",
-      color: "violet",
+      color: "#8a2be2",
       x: 0,
       y: 0,
       text: "",
-      score:0,
+      score: 0,
     },
     joueur8: {
       status: "off",
-      color: "grey",
+      color: "#808080",
       x: 0,
       y: 0,
       text: "",
-      score:0,
+      score: 0,
     },
   });
 }

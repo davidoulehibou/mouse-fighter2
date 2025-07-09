@@ -3,6 +3,7 @@ import Connect from "./Connect";
 import Canvas from "./Canvas";
 import Overlay from "./Overlay";
 import "./App.css";
+import PlayerList from "./PlayerList";
 
 function Index() {
   const [pseudo, setPseudo] = useState(null);
@@ -129,9 +130,11 @@ function Index() {
   return (
     <>
       <Canvas positions={positions} playerId={pseudo} />
+      <PlayerList positions={positions}/>
 
       {!error && pseudo ? (
         <Overlay handleNewPseudo={handleNewPseudo} positions={positions} />
+
       ) : (
         <Connect handlePseudo={handlePseudo} error={error} />
       )}
