@@ -15,6 +15,7 @@ function Index() {
       y: 0,
     },
   });
+    const [gameData, setGameData] = useState({})
 
   useEffect(() => {
     const cookies = document.cookie.split("; ");
@@ -34,6 +35,7 @@ function Index() {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log("Données reçues :", data);
       setPositions(data);
     };
 

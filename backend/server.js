@@ -3,6 +3,7 @@ const cors = require("cors"); // ✅ importer cors
 const fs = require("fs");
 const path = require("path");
 const dataFile = path.join(__dirname, "data.json");
+const gameData = path.join(__dirname, "gameData.json");
 const WebSocket = require("ws");
 const { json } = require("stream/consumers");
 
@@ -115,17 +116,34 @@ function updateText(joueur, text) {
   });
 }
 
-function broadcastJson() {
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) return;
-    try {
-      const jsonData = JSON.parse(data);
-      wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(jsonData));
+function broadcastMultipleJson(files) {
+  const results = {};
+  let filesRead = 0;
+
+  files.forEach((file) => {
+    fs.readFile(file, "utf8", (err, data) => {
+      if (!err) {
+        try {
+          results[path.basename(file)] = JSON.parse(data); // clé: nom de fichier sans chemin
+        } catch (e) {
+          console.error(`Erreur parsing ${file}:`, e);
+          results[path.basename(file)] = null;
         }
-      });
-    } catch {}
+      } else {
+        console.error(`Erreur lecture ${file}:`, err);
+        results[path.basename(file)] = null;
+      }
+
+      filesRead++;
+      if (filesRead === files.length) {
+        const message = JSON.stringify(results);
+        wss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+          }
+        });
+      }
+    });
   });
 }
 
@@ -186,8 +204,14 @@ function resetPlayerStatusByName(id) {
   });
 }
 
-fs.watch(dataFile, (eventType) => {
-  if (eventType === "change") broadcastJson();
+const watchFiles = [dataFile, gameData];
+
+watchFiles.forEach((file) => {
+  fs.watch(file, (eventType) => {
+    if (eventType === "change") {
+      broadcastMultipleJson(watchFiles);
+    }
+  });
 });
 
 // 🚀 Route HTTP pour changer le contenu selon x
@@ -328,7 +352,7 @@ app.get("/api/settext", (req, res) => {
         "joueur8",
       ].includes(utilisateur)
     ) {
-      console.log("ajout de points")
+      console.log("ajout de points");
       addPoints(utilisateur, points);
     }
     return;
