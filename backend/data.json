@@ -1,14 +1,14 @@
 {
   "joueur1": {
-    "status": "sdvd",
+    "status": "off",
     "color": "#ff0000",
-    "x": 0,
-    "y": 0,
+    "x": 0.37916666666666665,
+    "y": 0.4654427645788337,
     "text": "",
     "score": 0
   },
   "joueur2": {
-    "status": "dgdgf",
+    "status": "off",
     "color": "#0000ff",
     "x": 0,
     "y": 0,

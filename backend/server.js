@@ -3,7 +3,6 @@ const cors = require("cors"); // ✅ importer cors
 const fs = require("fs");
 const path = require("path");
 const dataFile = path.join(__dirname, "data.json");
-const gameData = path.join(__dirname, "gameData.json");
 const WebSocket = require("ws");
 const { json } = require("stream/consumers");
 
@@ -54,7 +53,7 @@ function processQueue() {
 function writeData(data) {
   return new Promise((resolve, reject) => {
     writeQueue.push({ data, resolve, reject });
-    processQueue(); // Lance le traitement si ce n'est pas déjà en cours
+    processQueue();
   });
 }
 
@@ -70,7 +69,6 @@ function updateContentByX(joueur, x, y, status) {
     try {
       jsonData = JSON.parse(data);
     } catch (parseErr) {
-      console.error("Erreur de parsing JSON:", parseErr);
       updateContentByX(joueur, x, y, status);
       return;
     }
@@ -116,29 +114,19 @@ function updateText(joueur, text) {
   });
 }
 
-async function broadcastMultipleJson(files) {
-  const results = {};
-
-  await Promise.all(
-    files.map(async (file) => {
-      try {
-        const data = await fs.promises.readFile(file, "utf8");
-        results[path.basename(file)] = JSON.parse(data);
-      } catch (err) {
-        console.error(`Erreur traitement ${file}:`, err);
-        results[path.basename(file)] = null;
-      }
-    })
-  );
-
-  const message = JSON.stringify(results);
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
-    }
+function broadcastJson() {
+  fs.readFile(dataFile, "utf8", (err, data) => {
+    if (err) return;
+    try {
+      const jsonData = JSON.parse(data);
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(jsonData));
+        }
+      });
+    } catch {}
   });
 }
-
 
 wss.on("connection", (ws) => {
   ws.isAlive = true;
@@ -197,16 +185,8 @@ function resetPlayerStatusByName(id) {
   });
 }
 
-const watchFiles = [dataFile, gameData];
-
-watchFiles.forEach((file) => {
-  fs.watch(file, (eventType) => {
-    if (eventType === "change") {
-      if (!isWriting) {
-        broadcastMultipleJson(watchFiles);
-      }
-    }
-  });
+fs.watch(dataFile, (eventType) => {
+  if (eventType === "change") broadcastJson();
 });
 
 // 🚀 Route HTTP pour changer le contenu selon x
@@ -316,7 +296,7 @@ app.get("/api/settext", (req, res) => {
   const text = req.query.text;
 
   if (text == "/reset") {
-    resetPlayers().then(() => res.send({ success: true }));
+    resetPlayers()
     return;
   }
 

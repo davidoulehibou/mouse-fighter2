@@ -33,11 +33,11 @@ function PlayerList({ positions, pseudo }) {
       <h1>Leaderboard</h1>
 
       {Object.entries(positions)
-        .filter(([_, data]) =>data.status !== "off")
+        .filter(([_, data]) => data.status !== "off")
         .sort(([, a], [, b]) => b.score - a.score)
         .map(([joueur, data]) => (
           <li key={joueur} className="player-card">
-           
+            {console.log(pseudo, data.status)}
             <p
               style={{
                 backgroundColor: data.color,
@@ -50,7 +50,6 @@ function PlayerList({ positions, pseudo }) {
               {data.status.charAt(0).toUpperCase() +
                 String(data.status).slice(1)}{" "}
               : <span>{data.score} pts</span>
-              
             </p>
           </li>
         ))}
