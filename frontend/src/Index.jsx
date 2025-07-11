@@ -36,7 +36,7 @@ function Index() {
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       console.log("Données reçues :", data);
-      setPositions(data);
+      setPositions(data.positions);
     };
 
     socket.onerror = (err) => {

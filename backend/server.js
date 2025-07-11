@@ -29,31 +29,45 @@ setInterval(() => {
 const writeQueue = [];
 let isWriting = false;
 
-function processQueue() {
+function queuePositions() {
   if (isWriting || writeQueue.length === 0) return;
 
   isWriting = true;
   const { data, resolve, reject } = writeQueue.shift();
 
-  fs.writeFile(dataFile, JSON.stringify(data, null, 2), "utf8", (err) => {
-    isWriting = false;
-
+  fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) {
-      console.error("Erreur d'écriture:", err);
-      reject(err);
-    } else {
-      resolve();
+      console.error("Erreur de lecture:", err);
+
+      return;
     }
 
-    // Appel récursif pour traiter le prochain élément
-    processQueue();
+    let jsonData;
+    try {
+      jsonData = JSON.parse(data);
+    } catch (parseErr) {
+      return;
+    }
+    jsonData.positions = data;
+    fs.writeFile(dataFile, JSON.stringify(data, null, 2), "utf8", (err) => {
+      isWriting = false;
+
+      if (err) {
+        console.error("Erreur d'écriture:", err);
+        reject(err);
+      } else {
+        resolve();
+      }
+
+      queuePositions();
+    });
   });
 }
 
-function writeData(data) {
+function writePositions(data) {
   return new Promise((resolve, reject) => {
     writeQueue.push({ data, resolve, reject });
-    processQueue();
+    queuePositions();
   });
 }
 
@@ -67,7 +81,8 @@ function updateContentByX(joueur, x, y, status) {
 
     let jsonData;
     try {
-      jsonData = JSON.parse(data);
+      jsonData = JSON.parse(data).positions;
+      console.log(jsonData)
     } catch (parseErr) {
       updateContentByX(joueur, x, y, status);
       return;
@@ -78,12 +93,13 @@ function updateContentByX(joueur, x, y, status) {
       jsonData[joueur].y = y;
       jsonData[joueur].status = status;
     } else {
+      console.log("prout");
       console.warn(`Le joueur "${joueur}" n'existe pas dans le fichier.`);
 
       return;
     }
 
-    writeData(jsonData);
+    writePositions(jsonData);
   });
 }
 
@@ -97,7 +113,7 @@ function updateText(joueur, text) {
     let jsonData;
 
     try {
-      jsonData = JSON.parse(data);
+      jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
       return;
@@ -110,7 +126,7 @@ function updateText(joueur, text) {
       return;
     }
 
-    writeData(jsonData);
+    writePositions(jsonData);
   });
 }
 
@@ -118,7 +134,7 @@ function broadcastJson() {
   fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) return;
     try {
-      const jsonData = JSON.parse(data);
+      const jsonData = JSON.parse(data).positions;
       wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify(jsonData));
@@ -159,7 +175,7 @@ function resetPlayerStatusByName(id) {
 
     let jsonData;
     try {
-      jsonData = JSON.parse(data);
+      jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
       return;
@@ -181,7 +197,7 @@ function resetPlayerStatusByName(id) {
       jsonData[joueursInfos.nom].y = 0;
     }
 
-    writeData(jsonData);
+    writePositions(jsonData);
   });
 }
 
@@ -217,7 +233,7 @@ app.get("/api/isplayerexist", (req, res) => {
 
     let jsonData;
     try {
-      jsonData = JSON.parse(data);
+      jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
       return res.status(500).json({ error: "Erreur de parsing JSON" });
@@ -257,7 +273,7 @@ app.get("/api/createPlayer", (req, res) => {
 
     let jsonData;
     try {
-      jsonData = JSON.parse(data);
+      jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
       return res.status(500).json({ error: "Erreur de parsing JSON" });
@@ -280,7 +296,7 @@ app.get("/api/createPlayer", (req, res) => {
     jsonData[availableKey].score = 0;
 
     // Sauvegarde
-    writeData(jsonData)
+    writePositions(jsonData)
       .then(() => {
         res.json({ success: true, playerSlot: availableKey });
       })
@@ -296,7 +312,7 @@ app.get("/api/settext", (req, res) => {
   const text = req.query.text;
 
   if (text == "/reset") {
-    resetPlayers()
+    resetPlayers();
     return;
   }
 
@@ -346,7 +362,7 @@ app.get("/api/settext", (req, res) => {
 
       let jsonData;
       try {
-        jsonData = JSON.parse(data);
+        jsonData = JSON.parse(data).positions;
       } catch (parseErr) {
         console.error("Erreur de parsing JSON:", parseErr);
         return res.status(500).json({ error: "Erreur de parsing JSON" });
@@ -368,7 +384,7 @@ function addPoints(utilisateur, points) {
     let jsonData;
 
     try {
-      jsonData = JSON.parse(data);
+      jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
       return;
@@ -381,12 +397,12 @@ function addPoints(utilisateur, points) {
       return;
     }
 
-    writeData(jsonData);
+    writePositions(jsonData);
   });
 }
 
 function resetPlayers() {
-  writeData({
+  writePositions({
     joueur1: {
       status: "off",
       color: "#ff0000",
