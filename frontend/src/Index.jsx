@@ -15,7 +15,7 @@ function Index() {
       y: 0,
     },
   });
-    const [gameData, setGameData] = useState({})
+  const [gameData, setGameData] = useState({});
 
   useEffect(() => {
     const cookies = document.cookie.split("; ");
@@ -35,8 +35,16 @@ function Index() {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log("Données reçues :", data);
-      setPositions(data);
+      console.log("data",data)
+      if (data["data.json"]) {
+        setPositions(data["data.json"]);
+      } else {
+        setPositions(data);
+      }
+      if (data["gameData.json"]) {
+        setGameData(data["gameData.json"]);
+      }
+      
     };
 
     socket.onerror = (err) => {
@@ -59,7 +67,7 @@ function Index() {
       socket.close(4000, pseudo);
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [pseudo]);
+  }, []);
 
   useEffect(() => {
     if (!pseudo) return;
@@ -132,14 +140,15 @@ function Index() {
   return (
     <>
       <Canvas positions={positions} playerId={pseudo} />
-      <PlayerList positions={positions} pseudo={pseudo}/>
+      <PlayerList positions={positions} pseudo={pseudo} />
 
       {!error && pseudo ? (
         <Overlay handleNewPseudo={handleNewPseudo} positions={positions} />
-
       ) : (
         <Connect handlePseudo={handlePseudo} error={error} />
       )}
+      
+      {console.log(gameData)}
     </>
   );
 }

@@ -71,7 +71,7 @@ function updateContentByX(joueur, x, y, status) {
       jsonData = JSON.parse(data);
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
-
+      updateContentByX(joueur, x, y, status);
       return;
     }
 
@@ -116,36 +116,29 @@ function updateText(joueur, text) {
   });
 }
 
-function broadcastMultipleJson(files) {
+async function broadcastMultipleJson(files) {
   const results = {};
-  let filesRead = 0;
 
-  files.forEach((file) => {
-    fs.readFile(file, "utf8", (err, data) => {
-      if (!err) {
-        try {
-          results[path.basename(file)] = JSON.parse(data); // clé: nom de fichier sans chemin
-        } catch (e) {
-          console.error(`Erreur parsing ${file}:`, e);
-          results[path.basename(file)] = null;
-        }
-      } else {
-        console.error(`Erreur lecture ${file}:`, err);
+  await Promise.all(
+    files.map(async (file) => {
+      try {
+        const data = await fs.promises.readFile(file, "utf8");
+        results[path.basename(file)] = JSON.parse(data);
+      } catch (err) {
+        console.error(`Erreur traitement ${file}:`, err);
         results[path.basename(file)] = null;
       }
+    })
+  );
 
-      filesRead++;
-      if (filesRead === files.length) {
-        const message = JSON.stringify(results);
-        wss.clients.forEach((client) => {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(message);
-          }
-        });
-      }
-    });
+  const message = JSON.stringify(results);
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
   });
 }
+
 
 wss.on("connection", (ws) => {
   ws.isAlive = true;
@@ -209,7 +202,9 @@ const watchFiles = [dataFile, gameData];
 watchFiles.forEach((file) => {
   fs.watch(file, (eventType) => {
     if (eventType === "change") {
-      broadcastMultipleJson(watchFiles);
+      if (!isWriting) {
+        broadcastMultipleJson(watchFiles);
+      }
     }
   });
 });
