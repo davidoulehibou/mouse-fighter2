@@ -35,21 +35,26 @@ function queuePositions() {
   isWriting = true;
   const { data, resolve, reject } = writeQueue.shift();
 
-  fs.readFile(dataFile, "utf8", (err, data) => {
+  fs.readFile(dataFile, "utf8", (err, fileData) => {
     if (err) {
       console.error("Erreur de lecture:", err);
-
       return;
     }
 
     let jsonData;
     try {
-      jsonData = JSON.parse(data);
+      jsonData = JSON.parse(fileData);
     } catch (parseErr) {
+      isWriting = false;
+      reject(parseErr);
+      queuePositions();
       return;
     }
+
+    // On remplace les positions par les nouvelles données
     jsonData.positions = data;
-    fs.writeFile(dataFile, JSON.stringify(data, null, 2), "utf8", (err) => {
+
+    fs.writeFile(dataFile, JSON.stringify(jsonData, null, 2), "utf8", (err) => {
       isWriting = false;
 
       if (err) {
@@ -59,7 +64,7 @@ function queuePositions() {
         resolve();
       }
 
-      queuePositions();
+      queuePositions(); // continue la queue
     });
   });
 }
@@ -81,10 +86,11 @@ function updateContentByX(joueur, x, y, status) {
 
     let jsonData;
     try {
+      
       jsonData = JSON.parse(data).positions;
-      console.log(jsonData)
+      
     } catch (parseErr) {
-      updateContentByX(joueur, x, y, status);
+      console.log(parseErr);
       return;
     }
 
@@ -113,6 +119,7 @@ function updateText(joueur, text) {
     let jsonData;
 
     try {
+      
       jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
@@ -175,6 +182,7 @@ function resetPlayerStatusByName(id) {
 
     let jsonData;
     try {
+      
       jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
@@ -233,7 +241,9 @@ app.get("/api/isplayerexist", (req, res) => {
 
     let jsonData;
     try {
+      
       jsonData = JSON.parse(data).positions;
+      
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
       return res.status(500).json({ error: "Erreur de parsing JSON" });
@@ -384,6 +394,7 @@ function addPoints(utilisateur, points) {
     let jsonData;
 
     try {
+      
       jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);

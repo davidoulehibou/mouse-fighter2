@@ -173,29 +173,31 @@ const Canvas = ({ positions, playerId }) => {
     canvas.height = windowSize.height;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+      Object.keys(positions).forEach((joueur) => {
+        const { x, y, color, status, text } = positions[joueur];
 
-    Object.keys(positions).forEach((joueur) => {
-      const { x, y, color, status, text } = positions[joueur];
+        let posx;
+        let posy;
 
-      let posx;
-      let posy;
+        if (status != playerId) {
+          posx = x * windowSize.width;
+          posy = y * windowSize.height;
+        } else if (mousePosition) {
+          posx = mousePosition.x;
+          posy = mousePosition.y;
+        }
 
-      if (status != playerId) {
-        posx = x * windowSize.width;
-        posy = y * windowSize.height;
-      } else if (mousePosition) {
-        posx = mousePosition.x;
-        posy = mousePosition.y;
-      }
+        if (status !== "off") {
+          drawPlayer(ctx, status.charAt(0).toUpperCase(), posx, posy, color);
+        }
 
-      if (status !== "off") {
-        drawPlayer(ctx, status.charAt(0).toUpperCase(), posx, posy, color);
-      }
+        if (text != "") {
+          drawSpeechBubble(ctx, text, posx, posy - 10, color, status);
+        }
+      });
 
-      if (text != "") {
-        drawSpeechBubble(ctx, text, posx, posy - 10, color, status);
-      }
-    });
+    
   }, [positions, windowSize, mousePosition]);
 
   return (

@@ -34,9 +34,14 @@ function Index() {
     };
 
     socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("Données reçues :", data);
-      setPositions(data.positions);
+      try {
+        const data = JSON.parse(event.data);
+        if (data.positions && typeof data.positions === "object") {
+          setPositions(data.positions);
+        }
+      } catch (e) {
+        console.error("Erreur lors du parsing WebSocket :", e);
+      }
     };
 
     socket.onerror = (err) => {

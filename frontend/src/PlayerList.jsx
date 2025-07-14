@@ -31,7 +31,7 @@ function PlayerList({ positions, pseudo }) {
   return (
     <ul className="player-list">
       <h1>Leaderboard</h1>
-
+      {/** 
       {Object.entries(positions)
         .filter(([_, data]) => data.status !== "off")
         .sort(([, a], [, b]) => b.score - a.score)
@@ -52,7 +52,7 @@ function PlayerList({ positions, pseudo }) {
               : <span>{data.score} pts</span>
             </p>
           </li>
-        ))}
+        ))} */}
     </ul>
   );
 }
