@@ -36,9 +36,8 @@ function Index() {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.positions && typeof data.positions === "object") {
-          setPositions(data.positions);
-        }
+
+          setPositions(data.positions || data);
       } catch (e) {
         console.error("Erreur lors du parsing WebSocket :", e);
       }
@@ -120,19 +119,21 @@ function Index() {
     }`;
   };
 
-  const handleNewPseudo = async (numJoueur) => {
-    try {
-      await fetch(
-        `${
-          import.meta.env.VITE_URL
-        }/api/set-x?joueur=${numJoueur}&x=0&y=0&status=off`
-      );
-    } catch (err) {
-      console.error("Erreur appel HTTP:", err);
-    }
-    document.cookie = "pseudo=; max-age=0";
-    setPseudo(null);
-  };
+const handleNewPseudo = async (numJoueur) => {
+  try {
+    await fetch(
+      `${import.meta.env.VITE_URL}/api/set-x?joueur=${numJoueur}&x=0&y=0&status=off`
+    );
+  } catch (err) {
+    console.error("Erreur appel HTTP:", err);
+  }
+  clearPseudo();
+};
+
+const clearPseudo = () => {
+  document.cookie = "pseudo=; max-age=0";
+  setPseudo(null);
+};
 
   return (
     <>

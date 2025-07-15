@@ -4,8 +4,7 @@ import TextInput from "./TextInput";
 const Canvas = ({ positions, playerId }) => {
   const canvasRef = useRef(null);
 
-  const [numJoueur, setNumJoueur] = useState(null)
-
+  const [numJoueur, setNumJoueur] = useState(null);
 
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -44,17 +43,15 @@ const Canvas = ({ positions, playerId }) => {
   }, []);
 
   useEffect(() => {
-
-    if(playerId){
+    if (playerId) {
       Object.keys(positions).forEach((joueur) => {
-      if (positions[joueur].status == playerId) {
-        setNumJoueur(joueur);
-      }
-    });
-    }else{
+        if (positions[joueur].status == playerId) {
+          setNumJoueur(joueur);
+        }
+      });
+    } else {
       setNumJoueur(null);
     }
-    
 
     if (numJoueur) {
       handleSetX(
@@ -98,8 +95,7 @@ const Canvas = ({ positions, playerId }) => {
     const radius = 20;
     const bullewidth = x + textWidth + padding * 2;
     const bulleheight = y - textHeight - padding * 1.5;
-
-    console.log(textWidth, bullewidth);
+    
 
     ctx.beginPath();
 
@@ -173,46 +169,43 @@ const Canvas = ({ positions, playerId }) => {
     canvas.height = windowSize.height;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-      Object.keys(positions).forEach((joueur) => {
-        const { x, y, color, status, text } = positions[joueur];
 
-        let posx;
-        let posy;
+    Object.keys(positions).forEach((joueur) => {
+      const { x, y, color, status, text } = positions[joueur];
 
-        if (status != playerId) {
-          posx = x * windowSize.width;
-          posy = y * windowSize.height;
-        } else if (mousePosition) {
-          posx = mousePosition.x;
-          posy = mousePosition.y;
-        }
+      let posx;
+      let posy;
 
-        if (status !== "off") {
-          drawPlayer(ctx, status.charAt(0).toUpperCase(), posx, posy, color);
-        }
+      if (status != playerId) {
+        posx = x * windowSize.width;
+        posy = y * windowSize.height;
+      } else if (mousePosition) {
+        posx = mousePosition.x;
+        posy = mousePosition.y;
+      }
 
-        if (text != "") {
-          drawSpeechBubble(ctx, text, posx, posy - 10, color, status);
-        }
-      });
+      if (status !== "off") {
+        drawPlayer(ctx, status.charAt(0).toUpperCase(), posx, posy, color);
+      }
 
-    
+      if (text != "") {
+        drawSpeechBubble(ctx, text, posx, posy - 10, color, status);
+      }
+    });
   }, [positions, windowSize, mousePosition]);
 
   return (
     <>
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        backgroundColor: "#b9dbff",
-      }}
-    />
-    {numJoueur && <TextInput joueur={numJoueur} name={playerId} />}
-    
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          backgroundColor: "#b9dbff",
+        }}
+      />
+      {numJoueur && <TextInput joueur={numJoueur} name={playerId} />}
     </>
   );
 };
