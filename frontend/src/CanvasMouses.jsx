@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import TextInput from "./TextInput";
 
-const Canvas = ({ positions, playerId }) => {
+const CanvasMouses = ({ positions, playerId }) => {
   const canvasRef = useRef(null);
 
   const [numJoueur, setNumJoueur] = useState(null);
@@ -202,7 +202,6 @@ const Canvas = ({ positions, playerId }) => {
           position: "absolute",
           top: 0,
           left: 0,
-          backgroundColor: "#b9dbff",
         }}
       />
       {numJoueur && <TextInput joueur={numJoueur} name={playerId} />}
@@ -210,4 +209,4 @@ const Canvas = ({ positions, playerId }) => {
   );
 };
 
-export default Canvas;
+export default CanvasMouses;

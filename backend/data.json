@@ -1,25 +1,25 @@
 {
   "positions": {
     "joueur1": {
-      "status": "test",
+      "status": "qsfgqdfg",
       "color": "#ff0000",
+      "x": 0.584518167456556,
+      "y": 0.004319654427645789,
+      "text": "",
+      "score": 0
+    },
+    "joueur2": {
+      "status": "off",
+      "color": "#0000ff",
       "x": 0,
       "y": 0,
       "text": "",
       "score": 0
     },
-    "joueur2": {
-      "status": "qsfgqdfg",
-      "color": "#0000ff",
-      "x": 0.2457627118644068,
-      "y": 0.0010799136069114472,
-      "text": "",
-      "score": 0
-    },
     "joueur3": {
-      "status": "ocghnghff",
-      "color": "#ffdd00",
-      "x": 0.5,
+      "status": "off",
+      "color": "#ffff00",
+      "x": 0,
       "y": 0,
       "text": "",
       "score": 0
@@ -66,7 +66,31 @@
     }
   },
   "game": {
-    "status": "play",
-    "countdown": 1
+    "status": "pause",
+    "countdown": 10,
+    "gameCanvas": {
+      "type": "game1",
+      "infos": {
+        "carre1": {
+          "color": "red",
+          "lt": {
+            "x": 0.8,
+            "y": 0.5
+          },
+          "rt": {
+            "x": 0.8,
+            "y": 0.9
+          },
+          "rb": {
+            "x": 0.5,
+            "y": 0.8
+          },
+          "lb": {
+            "x": 0.5,
+            "y": 0.5
+          }
+        }
+      }
+    }
   }
 }

@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import Connect from "./Connect";
-import Canvas from "./Canvas";
+import CanvasMouses from "./CanvasMouses";
 import Overlay from "./Overlay";
 import "./App.css";
 import PlayerList from "./PlayerList";
+import Game1 from "./gameCanvas/Game1";
 
 function Index() {
   const [pseudo, setPseudo] = useState(null);
@@ -38,8 +39,8 @@ function Index() {
         const data = JSON.parse(event.data);
 
         setPositions(data.positions);
-        if(data.game){
-          setGameData(data.game)
+        if (data.game) {
+          setGameData(data.game);
         }
       } catch (e) {
         console.error("Erreur lors du parsing WebSocket :", e);
@@ -140,11 +141,17 @@ function Index() {
     setPseudo(null);
   };
 
+  const gamesMap = {
+    game1: <Game1 infos={gameData.gameCanvas ? gameData.gameCanvas.infos : null}/>,
+  };
+
   return (
     <>
-      <Canvas positions={positions} playerId={pseudo} />
+    {gameData.status == "play" && gamesMap[gameData.gameCanvas.type]}
+    
+      <CanvasMouses positions={positions} playerId={pseudo} />
       <PlayerList positions={positions} pseudo={pseudo} />
-
+      
       {!error && pseudo ? (
         <Overlay handleNewPseudo={handleNewPseudo} gameData={gameData} />
       ) : (
