@@ -5,6 +5,7 @@ const path = require("path");
 const dataFile = path.join(__dirname, "data.json");
 const WebSocket = require("ws");
 const { json } = require("stream/consumers");
+const { count } = require("console");
 
 const app = express();
 const port = 3000;
@@ -29,11 +30,11 @@ setInterval(() => {
 const writeQueue = [];
 let isWriting = false;
 
-function queuePositions() {
+function queueWrite() {
   if (isWriting || writeQueue.length === 0) return;
 
   isWriting = true;
-  const { data, resolve, reject } = writeQueue.shift();
+  const { type, data, resolve, reject } = writeQueue.shift();
 
   fs.readFile(dataFile, "utf8", (err, fileData) => {
     if (err) {
@@ -47,12 +48,15 @@ function queuePositions() {
     } catch (parseErr) {
       isWriting = false;
       reject(parseErr);
-      queuePositions();
+      queueWrite();
       return;
     }
 
-    // On remplace les positions par les nouvelles données
-    jsonData.positions = data;
+    if (type == "position") {
+      jsonData.positions = data;
+    } else if (type == "game") {
+      jsonData.game = data;
+    }
 
     fs.writeFile(dataFile, JSON.stringify(jsonData, null, 2), "utf8", (err) => {
       isWriting = false;
@@ -64,15 +68,22 @@ function queuePositions() {
         resolve();
       }
 
-      queuePositions(); // continue la queue
+      queueWrite(); // continue la queue
     });
   });
 }
 
 function writePositions(data) {
   return new Promise((resolve, reject) => {
-    writeQueue.push({ data, resolve, reject });
-    queuePositions();
+    writeQueue.push({ type: "position", data, resolve, reject });
+    queueWrite();
+  });
+}
+
+function writeGame(data) {
+  return new Promise((resolve, reject) => {
+    writeQueue.push({ type: "game", data, resolve, reject });
+    queueWrite();
   });
 }
 
@@ -86,11 +97,10 @@ function updateContentByX(joueur, x, y, status) {
 
     let jsonData;
     try {
-      
       jsonData = JSON.parse(data).positions;
-      
     } catch (parseErr) {
       console.log(parseErr);
+      updateContentByX(joueur, x, y, status);
       return;
     }
 
@@ -119,7 +129,6 @@ function updateText(joueur, text) {
     let jsonData;
 
     try {
-      
       jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
@@ -141,7 +150,7 @@ function broadcastJson() {
   fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) return;
     try {
-      const jsonData = JSON.parse(data).positions;
+      const jsonData = JSON.parse(data);
       wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify(jsonData));
@@ -182,7 +191,6 @@ function resetPlayerStatusByName(id) {
 
     let jsonData;
     try {
-      
       jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
@@ -241,9 +249,7 @@ app.get("/api/isplayerexist", (req, res) => {
 
     let jsonData;
     try {
-      
       jsonData = JSON.parse(data).positions;
-      
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
       return res.status(500).json({ error: "Erreur de parsing JSON" });
@@ -394,7 +400,6 @@ function addPoints(utilisateur, points) {
     let jsonData;
 
     try {
-      
       jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
       console.error("Erreur de parsing JSON:", parseErr);
@@ -480,6 +485,35 @@ function resetPlayers() {
     },
   });
 }
+
+//game
+
+setInterval(() => {
+  fs.readFile(dataFile, "utf8", (err, data) => {
+    if (err) {
+      console.error("Erreur de lecture:", err);
+      return;
+    }
+    let jsonData;
+    try {
+      jsonData = JSON.parse(data).game;
+    } catch (parseErr) {
+      console.error("Erreur de parsing JSON:", parseErr);
+      return;
+    }
+    jsonData.countdown = jsonData.countdown - 1;
+    if (jsonData.countdown < 0) {
+      jsonData.countdown = 10;
+      if (jsonData.status == "play") {
+        jsonData.status = "pause";
+      } else if (jsonData.status == "pause") {
+        jsonData.status = "play";
+        jsonData.countdown = 10;
+      }
+    }
+    writeGame(jsonData);
+  });
+}, 1000);
 
 app.listen(port, () => {
   console.log(`Serveur HTTP sur http://localhost:${port}`);

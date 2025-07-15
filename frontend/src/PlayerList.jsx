@@ -31,20 +31,18 @@ function PlayerList({ positions, pseudo }) {
   return (
     <ul className="player-list">
       <h1>Leaderboard</h1>
-      {/** 
       {Object.entries(positions)
         .filter(([_, data]) => data.status !== "off")
         .sort(([, a], [, b]) => b.score - a.score)
         .map(([joueur, data]) => (
           <li key={joueur} className="player-card">
-            {console.log(pseudo, data.status)}
             <p
               style={{
                 backgroundColor: data.color,
                 color: getTextColor(data.color),
                 padding: "4px 8px",
                 borderRadius: "4px",
-                opacity: `${pseudo == data.status ? "0.8" : "0.4"}`,
+                opacity: `${pseudo == data.status ? "1" : "0.4"}`,
               }}
             >
               {data.status.charAt(0).toUpperCase() +
@@ -52,7 +50,7 @@ function PlayerList({ positions, pseudo }) {
               : <span>{data.score} pts</span>
             </p>
           </li>
-        ))} */}
+        ))} 
     </ul>
   );
 }

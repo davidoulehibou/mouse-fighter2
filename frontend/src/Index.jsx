@@ -15,7 +15,7 @@ function Index() {
       y: 0,
     },
   });
-    const [gameData, setGameData] = useState({})
+  const [gameData, setGameData] = useState({});
 
   useEffect(() => {
     const cookies = document.cookie.split("; ");
@@ -37,7 +37,10 @@ function Index() {
       try {
         const data = JSON.parse(event.data);
 
-          setPositions(data.positions || data);
+        setPositions(data.positions);
+        if(data.game){
+          setGameData(data.game)
+        }
       } catch (e) {
         console.error("Erreur lors du parsing WebSocket :", e);
       }
@@ -119,30 +122,31 @@ function Index() {
     }`;
   };
 
-const handleNewPseudo = async (numJoueur) => {
-  try {
-    await fetch(
-      `${import.meta.env.VITE_URL}/api/set-x?joueur=${numJoueur}&x=0&y=0&status=off`
-    );
-  } catch (err) {
-    console.error("Erreur appel HTTP:", err);
-  }
-  clearPseudo();
-};
+  const handleNewPseudo = async (numJoueur) => {
+    try {
+      await fetch(
+        `${
+          import.meta.env.VITE_URL
+        }/api/set-x?joueur=${numJoueur}&x=0&y=0&status=off`
+      );
+    } catch (err) {
+      console.error("Erreur appel HTTP:", err);
+    }
+    clearPseudo();
+  };
 
-const clearPseudo = () => {
-  document.cookie = "pseudo=; max-age=0";
-  setPseudo(null);
-};
+  const clearPseudo = () => {
+    document.cookie = "pseudo=; max-age=0";
+    setPseudo(null);
+  };
 
   return (
     <>
       <Canvas positions={positions} playerId={pseudo} />
-      <PlayerList positions={positions} pseudo={pseudo}/>
+      <PlayerList positions={positions} pseudo={pseudo} />
 
       {!error && pseudo ? (
-        <Overlay handleNewPseudo={handleNewPseudo} positions={positions} />
-
+        <Overlay handleNewPseudo={handleNewPseudo} gameData={gameData} />
       ) : (
         <Connect handlePseudo={handlePseudo} error={error} />
       )}

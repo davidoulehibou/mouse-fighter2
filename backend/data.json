@@ -9,17 +9,17 @@
       "score": 0
     },
     "joueur2": {
-      "status": "sfgh",
+      "status": "qsfgqdfg",
       "color": "#0000ff",
-      "x": 0.1198547215496368,
+      "x": 0.2457627118644068,
       "y": 0.0010799136069114472,
       "text": "",
       "score": 0
     },
     "joueur3": {
-      "status": "off",
-      "color": "#ffff00",
-      "x": 0,
+      "status": "ocghnghff",
+      "color": "#ffdd00",
+      "x": 0.5,
       "y": 0,
       "text": "",
       "score": 0
@@ -67,6 +67,6 @@
   },
   "game": {
     "status": "play",
-    "countdown": 10
+    "countdown": 1
   }
 }
