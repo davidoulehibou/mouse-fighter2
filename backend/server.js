@@ -99,7 +99,7 @@ function updateContentByX(joueur, x, y, status) {
     try {
       jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
-      console.log(parseErr);
+      console.log("prout de zut",parseErr);
       updateContentByX(joueur, x, y, status);
       return;
     }
@@ -488,6 +488,52 @@ function resetPlayers() {
 
 //game
 
+function newGame() {
+  const gamelist = [game1];
+
+  const game = gamelist[Math.floor(Math.random() * gamelist.length)];
+
+  game();
+}
+
+function game1() {
+  fs.readFile(dataFile, "utf8", (err, data) => {
+    if (err) {
+      console.error("Erreur de lecture:", err);
+      return;
+    }
+    let jsonData;
+    try {
+      jsonData = JSON.parse(data).game;
+    } catch (parseErr) {
+      console.error("Erreur de parsing JSON:", parseErr);
+      return;
+    }
+    (jsonData.status = "play"), (jsonData.countdown = 5);
+    let posx = Math.random() * 0.8;
+    let posy = Math.random() * 0.8;
+    let posx2 = posx + Math.random() * (0.2 - 0.1) + 0.1;
+    let posy2 = posy + Math.random() * (0.2 - 0.1) + 0.1;
+    jsonData.gameCanvas = {
+      type: "game1",
+      infos: {
+        carre1: {
+          x: posx,
+          y: posy,
+          x2: posx2,
+          y2: posy2,
+        },
+      },
+    };
+
+    writeGame(jsonData);
+  });
+}
+
+function game2() {
+  console.log("game2");
+}
+
 setInterval(() => {
   fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) {
@@ -506,14 +552,55 @@ setInterval(() => {
       jsonData.countdown = 10;
       if (jsonData.status == "play") {
         jsonData.status = "pause";
+        checkWin();
       } else if (jsonData.status == "pause") {
-        jsonData.status = "play";
-        jsonData.countdown = 10;
+        writeGame(jsonData);
+        newGame();
       }
     }
     writeGame(jsonData);
   });
 }, 1000);
+
+function checkWin() {
+  fs.readFile(dataFile, "utf8", (err, data) => {
+    if (err) {
+      console.error("Erreur de lecture:", err);
+      return;
+    }
+    let jsonData;
+    try {
+      jsonData = JSON.parse(data);
+    } catch (parseErr) {
+      console.error("Erreur de parsing JSON:", parseErr);
+      return;
+    }
+    if (jsonData.game.gameCanvas.type == "game1") {
+      Object.keys(jsonData.positions).map((joueur) => {
+        if (jsonData.positions[joueur].status != "off") {
+    
+          if (
+            jsonData.positions[joueur].x > jsonData.game.gameCanvas.infos.carre1.x &&
+            jsonData.positions[joueur].x < jsonData.game.gameCanvas.infos.carre1.x2
+          ) {
+            if (
+              jsonData.positions[joueur].y >
+                jsonData.game.gameCanvas.infos.carre1.y &&
+              jsonData.positions[joueur].y < jsonData.game.gameCanvas.infos.carre1.y2
+            ) {
+              jsonData.positions[joueur].score = jsonData.positions[joueur].score+1
+            }
+          }
+        }
+      });
+    }
+    jsonData.game.gameCanvas = {}
+    jsonData.game.status = "pause"
+    jsonData.game.countdown = 10
+    writeGame(jsonData.game);
+    writePositions(jsonData.positions)
+  });
+}
 
 app.listen(port, () => {
   console.log(`Serveur HTTP sur http://localhost:${port}`);

@@ -1,12 +1,12 @@
 {
   "positions": {
     "joueur1": {
-      "status": "qsfgqdfg",
+      "status": "off",
       "color": "#ff0000",
-      "x": 0.584518167456556,
-      "y": 0.004319654427645789,
+      "x": 0,
+      "y": 0,
       "text": "",
-      "score": 0
+      "score": 3
     },
     "joueur2": {
       "status": "off",
@@ -67,30 +67,7 @@
   },
   "game": {
     "status": "pause",
-    "countdown": 3,
-    "gameCanvas": {
-      "type": "game1",
-      "infos": {
-        "carre1": {
-          "color": "red",
-          "lt": {
-            "x": 0.8,
-            "y": 0.5
-          },
-          "rt": {
-            "x": 0.8,
-            "y": 0.9
-          },
-          "rb": {
-            "x": 0.5,
-            "y": 0.8
-          },
-          "lb": {
-            "x": 0.5,
-            "y": 0.5
-          }
-        }
-      }
-    }
+    "countdown": 8,
+    "gameCanvas": {}
   }
 }
