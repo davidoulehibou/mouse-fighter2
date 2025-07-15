@@ -67,7 +67,7 @@
   },
   "game": {
     "status": "pause",
-    "countdown": 10,
+    "countdown": 3,
     "gameCanvas": {
       "type": "game1",
       "infos": {
