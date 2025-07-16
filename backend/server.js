@@ -509,12 +509,14 @@ function game1() {
       console.error("Erreur de parsing JSON:", parseErr);
       return;
     }
-    (jsonData.status = "play"), (jsonData.countdown = 5);
+    jsonData.status = "play"
+    jsonData.countdown = 5
     let posx = Math.random() * 0.8;
     let posy = Math.random() * 0.8;
     let posx2 = posx + Math.random() * (0.2 - 0.1) + 0.1;
     let posy2 = posy + Math.random() * (0.2 - 0.1) + 0.1;
     jsonData.gameCanvas = {
+      time:jsonData.countdown,
       type: "game1",
       infos: {
         carre1: {

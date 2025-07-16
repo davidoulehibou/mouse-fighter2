@@ -1,7 +1,8 @@
 // GameCanvas.jsx
 import { useRef, useEffect, useState } from "react";
+import Timer from "../utils/Timer";
 
-const GameCanvas = ({ onReady ,title }) => {
+const GameCanvas = ({ onReady ,title, gameData }) => {
   const canvasRef = useRef(null);
 
   const [windowSize, setWindowSize] = useState({
@@ -36,6 +37,7 @@ const GameCanvas = ({ onReady ,title }) => {
   return (
     <>
     <h1 className="gameTitle">{title}</h1>
+    <Timer gameData={gameData}/>
     <canvas
       ref={canvasRef}
       style={{

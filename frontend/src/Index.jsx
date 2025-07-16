@@ -142,7 +142,7 @@ function Index() {
   };
 
   const gamesMap = {
-    game1: <Game1 infos={gameData.gameCanvas ? gameData.gameCanvas.infos : null}/>,
+    game1: <Game1 gameData={gameData ? gameData : null}/>,
   };
 
   return (

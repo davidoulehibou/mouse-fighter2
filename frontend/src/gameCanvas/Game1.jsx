@@ -2,11 +2,13 @@
 import { useCallback, useState, useEffect } from "react";
 import GameCanvas from "./GameCanvas";
 
-const Game1 = ({ infos }) => {
+const Game1 = ({ gameData }) => {
   const [mousePosition, setMousePosition] = useState({
     x: 0,
     y: 0,
   });
+
+  const infos = gameData.gameCanvas.infos
 
   useEffect(() => {
     // Mettre à jour la position de la souris
@@ -105,7 +107,7 @@ const Game1 = ({ infos }) => {
   );
 
   return (
-    <GameCanvas onReady={handleCanvasReady} title="Restez dans le cadre !" />
+    <GameCanvas onReady={handleCanvasReady} title="Restez dans le cadre !" gameData={gameData} />
   );
 };
 

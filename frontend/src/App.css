@@ -113,6 +113,17 @@ form > div {
   font-size: 50px;
 }
 
+.gameTimer{
+  top:0;
+  position:absolute;
+  width:100vw;
+  margin:0
+}
+
+.gameTimer rect{
+  transition: width 1s steps(5, jump-start), fill 1s ;
+}
+
 .canvasMouse{
   transition: background-size 0.7s cubic-bezier(.80,-0.50,.30,1.40)
 }

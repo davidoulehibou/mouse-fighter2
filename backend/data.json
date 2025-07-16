@@ -6,7 +6,7 @@
       "x": 0,
       "y": 0,
       "text": "",
-      "score": 0
+      "score": 1
     },
     "joueur2": {
       "status": "off",
@@ -66,18 +66,8 @@
     }
   },
   "game": {
-    "status": "play",
-    "countdown": 0,
-    "gameCanvas": {
-      "type": "game1",
-      "infos": {
-        "carre1": {
-          "x": 0.05304159898618863,
-          "y": 0.35015332232268986,
-          "x2": 0.22864862020760462,
-          "y2": 0.5086808055705763
-        }
-      }
-    }
+    "status": "pause",
+    "countdown": 3,
+    "gameCanvas": {}
   }
 }
