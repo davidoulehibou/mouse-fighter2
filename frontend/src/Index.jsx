@@ -5,6 +5,7 @@ import Overlay from "./utils/Overlay";
 import "./App.css";
 import PlayerList from "./PlayerList";
 import Game1 from "./gameCanvas/Game1";
+import RideauSvg from "./utils/RideauSvg";
 
 function Index() {
   const [pseudo, setPseudo] = useState(null);
@@ -147,11 +148,16 @@ function Index() {
 
   return (
     <>
-    {gameData.status == "play" && gamesMap[gameData.gameCanvas.type]}
-    
-      <CanvasMouses positions={positions} playerId={pseudo} gameStatus={gameData.status}/>
+      <RideauSvg color="red" dataGame={gameData.status} />
+      {gameData.status == "play" && gamesMap[gameData.gameCanvas.type]}
+
+      <CanvasMouses
+        positions={positions}
+        playerId={pseudo}
+        gameStatus={gameData.status}
+      />
       <PlayerList positions={positions} pseudo={pseudo} />
-      
+
       {!error && pseudo ? (
         <Overlay handleNewPseudo={handleNewPseudo} gameData={gameData} />
       ) : (

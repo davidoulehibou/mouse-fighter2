@@ -3,8 +3,8 @@
     "joueur1": {
       "status": "fghjfgh",
       "color": "#ff0000",
-      "x": 0.6767881241565452,
-      "y": 0.998911860718172,
+      "x": 0.99527665317139,
+      "y": 0.5542916235780765,
       "text": "",
       "score": 0
     },
@@ -67,7 +67,7 @@
   },
   "game": {
     "status": "pause",
-    "countdown": 1,
+    "countdown": 2,
     "gameCanvas": {}
   }
 }
