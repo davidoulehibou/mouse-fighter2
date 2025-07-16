@@ -7,7 +7,7 @@ function Overlay({ handleNewPseudo }) {
       
       <button
         onClick={() => handleNewPseudo(numJoueur)}
-        style={{ position: "absolute", zIndex: "1000" }}
+        style={{ position: "absolute", zIndex: "1000", bottom:0, right:0}}
         className="bouton"
       >
         Changer de pseudo

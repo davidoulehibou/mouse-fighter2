@@ -30,6 +30,8 @@ body {
   top: 0;
   left: 0;
   cursor: auto;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 }
 
 form {
@@ -48,6 +50,11 @@ form {
   position: relative;
   z-index: 1;
   cursor: auto;
+}
+
+
+h1 {
+  margin: 0;
 }
 
 .pseudo {
@@ -72,7 +79,13 @@ form {
   background-color: #1565c0;
 }
 
-form p {
+
+p{
+  font-size:1.5rem;
+  line-height: 70%;
+}
+
+form .error {
   color: green;
   margin: 0;
   font-weight: bold;
@@ -97,9 +110,6 @@ form > div {
   font-weight: 700;
 }
 
-.player-list h1 {
-  margin: 0;
-}
 
 .player-list span {
   font-weight: 900;
