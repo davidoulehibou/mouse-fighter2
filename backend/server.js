@@ -387,7 +387,7 @@ app.get("/api/settext", (req, res) => {
         updateText(joueur, "");
       }
     });
-  }, "5000");
+  }, 5000);
 });
 
 function addPoints(utilisateur, points) {
