@@ -67,7 +67,7 @@
   },
   "game": {
     "status": "pause",
-    "countdown": 2,
+    "countdown": 0,
     "gameCanvas": {}
   }
 }
