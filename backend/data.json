@@ -1,12 +1,12 @@
 {
   "positions": {
     "joueur1": {
-      "status": "sdfvsdv",
+      "status": "fghjfgh",
       "color": "#ff0000",
-      "x": 0.14408602150537633,
-      "y": 0.009719222462203024,
+      "x": 0.6767881241565452,
+      "y": 0.998911860718172,
       "text": "",
-      "score": 2
+      "score": 0
     },
     "joueur2": {
       "status": "off",
@@ -66,19 +66,8 @@
     }
   },
   "game": {
-    "status": "play",
+    "status": "pause",
     "countdown": 1,
-    "gameCanvas": {
-      "time": 5,
-      "type": "game1",
-      "infos": {
-        "carre1": {
-          "x": 0.3089551298526848,
-          "y": 0.48655796997729883,
-          "x2": 0.46869493866079326,
-          "y2": 0.650182824444084
-        }
-      }
-    }
+    "gameCanvas": {}
   }
 }
