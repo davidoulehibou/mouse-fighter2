@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import TextInput from "./TextInput";
+import getTextColor, { getInsideColor } from "./utils/getTextColor";
 
-const CanvasMouses = ({ positions, playerId }) => {
+const CanvasMouses = ({ positions, playerId, gameStatus }) => {
   const canvasRef = useRef(null);
 
   const [numJoueur, setNumJoueur] = useState(null);
@@ -86,7 +87,7 @@ const CanvasMouses = ({ positions, playerId }) => {
   }, [windowSize]);
 
   function drawSpeechBubble(ctx, text, x, y, color, name) {
-    ctx.font = "16px Arial";
+    ctx.font = "30px Dongle";
 
     const padding = 10;
     const textMetrics = ctx.measureText(text);
@@ -95,7 +96,6 @@ const CanvasMouses = ({ positions, playerId }) => {
     const radius = 20;
     const bullewidth = x + textWidth + padding * 2;
     const bulleheight = y - textHeight - padding * 1.5;
-    
 
     ctx.beginPath();
 
@@ -117,7 +117,7 @@ const CanvasMouses = ({ positions, playerId }) => {
     ctx.closePath();
 
     // Styles
-    ctx.fillStyle = "rgb(255,255,255,0.5";
+    ctx.fillStyle = "rgb(255,255,255,0.5)";
     ctx.lineWidth = 2;
     ctx.fill();
     ctx.fillStyle = "#000";
@@ -125,10 +125,18 @@ const CanvasMouses = ({ positions, playerId }) => {
     ctx.textBaseline = "alphabetic";
     ctx.fillText(text, x + padding, y - padding);
 
-    ctx.font = "12px Arial";
-    ctx.fillStyle = color;
+    ctx.font = "20px Dongle";
+    ctx.fillStyle = getInsideColor(color);
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 4;
+    ctx.lineJoin = "round";
+    ctx.strokeText(
+      name.charAt(0).toUpperCase() + String(name).slice(1),
+      x + padding,
+      y - 30
+    );
     ctx.fillText(
       name.charAt(0).toUpperCase() + String(name).slice(1),
       x + padding,
@@ -140,25 +148,29 @@ const CanvasMouses = ({ positions, playerId }) => {
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x, y + 18);
-
     ctx.lineTo(x + 7, y + 13);
     ctx.lineTo(x + 13, y + 13);
     ctx.lineTo(x, y);
-    ctx.fillStyle = "white";
+    ctx.closePath();
+    ctx.fillStyle = getInsideColor(color);
     ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
+
+    ctx.lineWidth = 3;
+    ctx.lineJoin = "round";
     ctx.stroke();
     ctx.fill();
 
-    ctx.font = "16px Arial";
+    ctx.font = "35px Dongle";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = getTextColor(color);
     ctx.lineWidth = 5;
     ctx.lineJoin = "round";
-    ctx.strokeText(letter, x + 12, y + 25);
+    ctx.strokeText(letter, x + 17, y + 30);
+    ctx.strokeText(letter, x + 18, y + 31);
+    ctx.strokeText(letter, x + 19, y + 32);
     ctx.fillStyle = color;
-    ctx.fillText(letter, x + 12, y + 25);
+    ctx.fillText(letter, x + 17, y + 30);
   }
 
   useEffect(() => {
@@ -197,11 +209,18 @@ const CanvasMouses = ({ positions, playerId }) => {
   return (
     <>
       <canvas
+      className="canvasMouse"
         ref={canvasRef}
         style={{
           position: "absolute",
           top: 0,
           left: 0,
+          backgroundImage: `radial-gradient(circle,
+            ${numJoueur ? positions[numJoueur].color : "#000000"}05 10%,
+             ${numJoueur ? positions[numJoueur].color : "#000000"}90 40%)`,
+          backgroundPosition: "center",
+          backgroundSize: gameStatus == "play" ? "700%" : "200%",
+          
         }}
       />
       {numJoueur && <TextInput joueur={numJoueur} name={playerId} />}

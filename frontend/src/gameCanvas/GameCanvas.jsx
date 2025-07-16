@@ -1,7 +1,7 @@
 // GameCanvas.jsx
 import { useRef, useEffect, useState } from "react";
 
-const GameCanvas = ({ onReady }) => {
+const GameCanvas = ({ onReady ,title }) => {
   const canvasRef = useRef(null);
 
   const [windowSize, setWindowSize] = useState({
@@ -34,15 +34,17 @@ const GameCanvas = ({ onReady }) => {
   }, [windowSize, onReady]);
 
   return (
+    <>
+    <h1 className="gameTitle">{title}</h1>
     <canvas
       ref={canvasRef}
       style={{
         position: "absolute",
         top: 0,
         left: 0,
-        backgroundColor: "#b9dbff",
       }}
     />
+    </>
   );
 };
 

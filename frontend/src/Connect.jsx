@@ -19,6 +19,7 @@ function Connect({ handlePseudo, error }) {
           value={pseudo}
           onChange={(e) => setPseudo(e.target.value)}
           placeholder="Entrez votre pseudo"
+          maxlength="20"
         />
         <button type="submit" className="bouton">
           Se connecter

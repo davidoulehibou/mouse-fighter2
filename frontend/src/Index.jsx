@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Connect from "./Connect";
 import CanvasMouses from "./CanvasMouses";
-import Overlay from "./Overlay";
+import Overlay from "./utils/Overlay";
 import "./App.css";
 import PlayerList from "./PlayerList";
 import Game1 from "./gameCanvas/Game1";
@@ -149,7 +149,7 @@ function Index() {
     <>
     {gameData.status == "play" && gamesMap[gameData.gameCanvas.type]}
     
-      <CanvasMouses positions={positions} playerId={pseudo} />
+      <CanvasMouses positions={positions} playerId={pseudo} gameStatus={gameData.status}/>
       <PlayerList positions={positions} pseudo={pseudo} />
       
       {!error && pseudo ? (

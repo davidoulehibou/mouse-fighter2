@@ -596,7 +596,7 @@ function checkWin() {
     }
     jsonData.game.gameCanvas = {}
     jsonData.game.status = "pause"
-    jsonData.game.countdown = 10
+    jsonData.game.countdown = 3
     writeGame(jsonData.game);
     writePositions(jsonData.positions)
   });
