@@ -328,26 +328,23 @@ app.get("/api/settext", (req, res) => {
   const joueur = req.query.joueur;
   const text = req.query.text;
 
-  console.log("api sttext", text)
+  console.log("api settext", text);
 
-  if (text == "/reset") {
-    resetPlayers();
-    return;
+  if (!joueur || typeof text !== "string") {
+    return res.status(400).json({ success: false, error: "Paramètres invalides" });
   }
 
+  // Commande spéciale : /reset
+  if (text === "/reset") {
+    resetPlayers();
+    return res.json({ success: true, message: "Joueurs réinitialisés" });
+  }
+
+  // Commande spéciale : /points utilisateurX 120
   if (text.includes("/points")) {
-    // On découpe la chaîne en mots
     const parts = text.split(" ");
-
-    // parts[0] = "/points"
-    // parts[1] = "utilisateurX"
-    // parts[2] = "120"
-
     const utilisateur = parts[1];
-    const points = Number(parts[2]); // convertit en nombre
-
-    console.log("Utilisateur :", utilisateur);
-    console.log("Points :", points);
+    const points = Number(parts[2]);
 
     if (
       points &&
@@ -364,17 +361,21 @@ app.get("/api/settext", (req, res) => {
     ) {
       console.log("ajout de points");
       addPoints(utilisateur, points);
+      return res.json({ success: true, message: `Ajouté ${points} points à ${utilisateur}` });
+    } else {
+      return res.status(400).json({ success: false, error: "Commande /points mal formée ou joueur inconnu" });
     }
-    return;
   }
 
+  // Texte standard
   updateText(joueur, text);
 
+  // Planification de l'effacement dans 5 secondes
   setTimeout(() => {
     fs.readFile(dataFile, "utf8", (err, data) => {
       if (err) {
         console.error("Erreur de lecture:", err);
-        return res.status(500).json({ error: "Erreur de lecture du fichier" });
+        return;
       }
 
       let jsonData;
@@ -382,14 +383,19 @@ app.get("/api/settext", (req, res) => {
         jsonData = JSON.parse(data).positions;
       } catch (parseErr) {
         console.error("Erreur de parsing JSON:", parseErr);
-        return res.status(500).json({ error: "Erreur de parsing JSON" });
+        return;
       }
-      if (jsonData[joueur].text == text) {
+
+      if (jsonData[joueur]?.text === text) {
         updateText(joueur, "");
       }
     });
   }, 5000);
+
+  // Réponse immédiate au client
+  return res.json({ success: true, message: "Texte mis à jour avec succès" });
 });
+
 
 function addPoints(utilisateur, points) {
   fs.readFile(dataFile, "utf8", (err, data) => {

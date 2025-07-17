@@ -14,7 +14,7 @@
       "x": 0,
       "y": 0,
       "text": "",
-      "score": 1
+      "score": 0
     },
     "joueur3": {
       "status": "off",
@@ -67,7 +67,7 @@
   },
   "game": {
     "status": "pause",
-    "countdown": 0,
+    "countdown": 1,
     "gameCanvas": {}
   }
 }
