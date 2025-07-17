@@ -148,7 +148,7 @@ function Index() {
 
   return (
     <>
-      <RideauSvg color="red" dataGame={gameData.status} />
+      
       {gameData.status == "play" && gamesMap[gameData.gameCanvas.type]}
 
       <CanvasMouses

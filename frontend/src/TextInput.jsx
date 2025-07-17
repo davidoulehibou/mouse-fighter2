@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 const TextInput = ({ joueur }) => {
   const [text, setText] = useState("");
   const inputRef = useRef(null);
-  
 
   useEffect(() => {
     const handleGlobalKeyDown = () => {
@@ -21,13 +20,15 @@ const TextInput = ({ joueur }) => {
 
   const handleKeyDown = async (event) => {
     if (event.key === "Enter") {
-      console.log("Entrée pressée");
+      const currentText = text;
       setText("");
       try {
         await fetch(
           `${
             import.meta.env.VITE_URL
-          }/api/settext?joueur=${joueur}&text=${text}`
+          }/api/settext?joueur=${joueur}&text=${encodeURIComponent(
+            currentText
+          )}`
         );
       } catch (err) {
         console.error("Erreur appel HTTP:", err);
@@ -41,7 +42,7 @@ const TextInput = ({ joueur }) => {
 
   return (
     <input
-    className="chat"
+      className="chat"
       ref={inputRef}
       type="text"
       value={text}

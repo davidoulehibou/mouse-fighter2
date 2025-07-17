@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import TextInput from "./TextInput";
 import getTextColor, { getInsideColor } from "./utils/getTextColor";
+import RideauSvg from "./utils/RideauSvg";
 
 const CanvasMouses = ({ positions, playerId, gameStatus }) => {
   const canvasRef = useRef(null);
@@ -208,6 +209,7 @@ const CanvasMouses = ({ positions, playerId, gameStatus }) => {
 
   return (
     <>
+    <RideauSvg color={numJoueur ? positions[numJoueur].color : "grey"} dataGame={gameStatus} />
       <canvas
       className="canvasMouse"
         ref={canvasRef}

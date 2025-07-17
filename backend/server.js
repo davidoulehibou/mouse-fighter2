@@ -120,6 +120,7 @@ function updateContentByX(joueur, x, y, status) {
 }
 
 function updateText(joueur, text) {
+  console.log("updateText()",text)
   fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) {
       console.error("Erreur de lecture:", err);
@@ -327,6 +328,8 @@ app.get("/api/settext", (req, res) => {
   const joueur = req.query.joueur;
   const text = req.query.text;
 
+  console.log("api sttext", text)
+
   if (text == "/reset") {
     resetPlayers();
     return;
@@ -366,8 +369,6 @@ app.get("/api/settext", (req, res) => {
   }
 
   updateText(joueur, text);
-
-  console.log(text);
 
   setTimeout(() => {
     fs.readFile(dataFile, "utf8", (err, data) => {

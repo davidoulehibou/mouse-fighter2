@@ -1,10 +1,10 @@
 {
   "positions": {
     "joueur1": {
-      "status": "fghjfgh",
+      "status": "off",
       "color": "#ff0000",
-      "x": 0.99527665317139,
-      "y": 0.5542916235780765,
+      "x": 0,
+      "y": 0,
       "text": "",
       "score": 0
     },
@@ -14,7 +14,7 @@
       "x": 0,
       "y": 0,
       "text": "",
-      "score": 0
+      "score": 1
     },
     "joueur3": {
       "status": "off",
