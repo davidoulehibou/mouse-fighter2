@@ -6,7 +6,7 @@ const Timer = ({ gameData }) => {
         <rect
           width={(gameData.countdown / gameData.gameCanvas.time) * 300}
           height="1"
-          fill={`hsl(${progress * 120}, 80%, 60%)`}
+          fill={progress == 1 ? "#00FF0000" : `hsl(${progress * 120}, 80%, 60%)`}
         />
       </svg>
     </>

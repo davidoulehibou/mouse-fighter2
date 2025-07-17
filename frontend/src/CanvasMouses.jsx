@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import TextInput from "./TextInput";
 import getTextColor, { getInsideColor } from "./utils/getTextColor";
 import RideauSvg from "./utils/RideauSvg";
+import Game1 from "./gameCanvas/Game1";
+import Game2 from "./gameCanvas/Game2";
 
-const CanvasMouses = ({ positions, playerId, gameStatus }) => {
+const CanvasMouses = ({ positions, playerId, gameData }) => {
+  const gameStatus = gameData.status;
   const canvasRef = useRef(null);
 
   const [numJoueur, setNumJoueur] = useState(null);
@@ -207,11 +210,23 @@ const CanvasMouses = ({ positions, playerId, gameStatus }) => {
     });
   }, [positions, windowSize, mousePosition]);
 
+  const gamesMap = {
+    game1: <Game1 gameData={gameData ? gameData : null} />,
+    game2: <Game2 gameData={gameData ? gameData : null} />,
+  };
+
   return (
     <>
-    <RideauSvg color={numJoueur ? positions[numJoueur].color : "grey"} dataGame={gameStatus} />
+      <RideauSvg
+        color={numJoueur ? positions[numJoueur].color : "grey"}
+        score={numJoueur ? positions[numJoueur].score : 0}
+        dataGame={gameStatus}
+      />
+
+      {gameStatus == "play" && gamesMap[gameData.gameCanvas.type]}
+
       <canvas
-      className="canvasMouse"
+        className="canvasMouse"
         ref={canvasRef}
         style={{
           position: "absolute",
@@ -222,9 +237,10 @@ const CanvasMouses = ({ positions, playerId, gameStatus }) => {
              ${numJoueur ? positions[numJoueur].color : "#000000"}90 40%)`,
           backgroundPosition: "center",
           backgroundSize: gameStatus == "play" ? "700%" : "200%",
-          
+          outline: "white 100000px solid",
+          transform: "scale(1)",
         }}
-      />
+      ></canvas>
       {numJoueur && <TextInput joueur={numJoueur} name={playerId} />}
     </>
   );

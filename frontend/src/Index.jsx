@@ -143,20 +143,15 @@ function Index() {
     setPseudo(null);
   };
 
-  const gamesMap = {
-    game1: <Game1 gameData={gameData ? gameData : null}/>,
-    game2: <Game2 gameData={gameData ? gameData : null}/>,
-  };
+  
 
   return (
     <>
-      
-      {gameData.status == "play" && gamesMap[gameData.gameCanvas.type]}
 
       <CanvasMouses
         positions={positions}
         playerId={pseudo}
-        gameStatus={gameData.status}
+        gameData={gameData}
       />
       <PlayerList positions={positions} pseudo={pseudo} />
 

@@ -1,5 +1,9 @@
 <svg width="2046" height="2046" viewBox="0 0 2046 2046" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_133_2)">
+<style>
+            .rideau {
+  animation: spin 200s linear infinite
+}
+          </style><g clip-path="url(#clip0_133_2)">
 <path d="M513.413 -207.251L1023 1023L705.817 -286.948L513.413 -207.251Z" fill="#FF0000"/>
 <path d="M1532.59 2253.25L1023 1023L1340.18 2332.95L1532.59 2253.25Z" fill="#FF0000"/>
 <path d="M2253.25 513.413L1023 1023L2332.95 705.817L2253.25 513.413Z" fill="#FF0000"/>

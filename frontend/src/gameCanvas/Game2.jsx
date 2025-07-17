@@ -7,7 +7,7 @@ const Game2 = ({ gameData }) => {
     const ctx = canvas.getContext("2d");
     ctx.font = "100px Dongle";
     ctx.textAlign = "center";
-    ctx.fillText(gameData.gameCanvas.infos.mot, windowSize.width / 2, 100);
+    ctx.fillText(gameData.gameCanvas.infos.mot, windowSize.width / 2, 110);
   }, []);
 
   return (

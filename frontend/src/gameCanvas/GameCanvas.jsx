@@ -2,13 +2,19 @@
 import { useRef, useEffect, useState } from "react";
 import Timer from "../utils/Timer";
 
-const GameCanvas = ({ onReady ,title, gameData }) => {
+const GameCanvas = ({ onReady, title, gameData }) => {
   const canvasRef = useRef(null);
 
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   });
+
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -34,18 +40,31 @@ const GameCanvas = ({ onReady ,title, gameData }) => {
     }
   }, [windowSize, onReady]);
 
+  useEffect(() => {
+    if (gameData?.countdown === 1) {
+      console.log("prout1");
+      setTimeout(() => {
+        console.log("prout2");
+        setIsVisible(false);
+      }, [1500]);
+    }
+  }, [gameData?.countdown]);
+
   return (
     <>
-    <h1 className="gameTitle">{title}</h1>
-    <Timer gameData={gameData}/>
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-      }}
-    />
+    <Timer gameData={gameData} />
+    <div className={`gameCanvas ${isVisible ? "visible" : "notvisible"}`}>
+      <h1 className="gameTitle">{title}</h1>
+      
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
+      />
+    </div>
     </>
   );
 };
