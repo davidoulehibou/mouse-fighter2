@@ -99,7 +99,7 @@ function updateContentByX(joueur, x, y, status) {
     try {
       jsonData = JSON.parse(data).positions;
     } catch (parseErr) {
-      console.log("prout de zut",parseErr);
+      console.log("prout de zut", parseErr);
       updateContentByX(joueur, x, y, status);
       return;
     }
@@ -120,7 +120,7 @@ function updateContentByX(joueur, x, y, status) {
 }
 
 function updateText(joueur, text) {
-  console.log("updateText()",text)
+  console.log("updateText()", text);
   fs.readFile(dataFile, "utf8", (err, data) => {
     if (err) {
       console.error("Erreur de lecture:", err);
@@ -331,7 +331,9 @@ app.get("/api/settext", (req, res) => {
   console.log("api settext", text);
 
   if (!joueur || typeof text !== "string") {
-    return res.status(400).json({ success: false, error: "Paramètres invalides" });
+    return res
+      .status(400)
+      .json({ success: false, error: "Paramètres invalides" });
   }
 
   // Commande spéciale : /reset
@@ -361,9 +363,15 @@ app.get("/api/settext", (req, res) => {
     ) {
       console.log("ajout de points");
       addPoints(utilisateur, points);
-      return res.json({ success: true, message: `Ajouté ${points} points à ${utilisateur}` });
+      return res.json({
+        success: true,
+        message: `Ajouté ${points} points à ${utilisateur}`,
+      });
     } else {
-      return res.status(400).json({ success: false, error: "Commande /points mal formée ou joueur inconnu" });
+      return res.status(400).json({
+        success: false,
+        error: "Commande /points mal formée ou joueur inconnu",
+      });
     }
   }
 
@@ -390,12 +398,11 @@ app.get("/api/settext", (req, res) => {
         updateText(joueur, "");
       }
     });
-  }, 5000);
+  }, 7000);
 
   // Réponse immédiate au client
   return res.json({ success: true, message: "Texte mis à jour avec succès" });
 });
-
 
 function addPoints(utilisateur, points) {
   fs.readFile(dataFile, "utf8", (err, data) => {
@@ -496,7 +503,7 @@ function resetPlayers() {
 //game
 
 function newGame() {
-  const gamelist = [game1];
+  const gamelist = [game1, game2];
 
   const game = gamelist[Math.floor(Math.random() * gamelist.length)];
 
@@ -516,14 +523,14 @@ function game1() {
       console.error("Erreur de parsing JSON:", parseErr);
       return;
     }
-    jsonData.status = "play"
-    jsonData.countdown = 5
+    jsonData.status = "play";
+    jsonData.countdown = 5;
     let posx = Math.random() * 0.8;
     let posy = Math.random() * 0.8;
     let posx2 = posx + Math.random() * (0.2 - 0.1) + 0.1;
     let posy2 = posy + Math.random() * (0.2 - 0.1) + 0.1;
     jsonData.gameCanvas = {
-      time:jsonData.countdown,
+      time: jsonData.countdown,
       type: "game1",
       infos: {
         carre1: {
@@ -540,7 +547,127 @@ function game1() {
 }
 
 function game2() {
-  console.log("game2");
+  fs.readFile(dataFile, "utf8", (err, data) => {
+    if (err) {
+      console.error("Erreur de lecture:", err);
+      return;
+    }
+    let jsonData;
+    try {
+      jsonData = JSON.parse(data).game;
+    } catch (parseErr) {
+      console.error("Erreur de parsing JSON:", parseErr);
+      return;
+    }
+    jsonData.status = "play";
+    jsonData.countdown = 5;
+    let words = [
+      "caca",
+      "prout",
+      "zizi",
+      "popo",
+      "dodo",
+      "pipi",
+      "bidet",
+      "pouet",
+      "gnouf",
+      "zinzin",
+      "chien",
+      "chat",
+      "maison",
+      "table",
+      "chaud",
+      "froid",
+      "banal",
+      "plage",
+      "poule",
+      "tasse",
+      "clown",
+      "gogos",
+      "rigol",
+      "bouse",
+      "groin",
+      "pouah",
+      "gloup",
+      "baffe",
+      "livre",
+      "nuit",
+      "boubou",
+      "croco",
+      "pifou",
+      "niais",
+      "babou",
+      "cibou",
+      "zigou",
+      "dinde",
+      "ronzo",
+      "bébête",
+      "lune",
+      "rouge",
+      "bleue",
+      "blanc",
+      "noire",
+      "jaune",
+      "vert",
+      "rire",
+      "pleur",
+      "singe",
+      "patat",
+      "bambin",
+      "goglu",
+      "fifou",
+      "tarte",
+      "crazy",
+      "coucou",
+      "kiki",
+      "boule",
+      "guano",
+      "tigre",
+      "zèbre",
+      "pomme",
+      "poire",
+      "banane",
+      "neige",
+      "pluie",
+      "nuage",
+      "soleil",
+      "vent",
+      "lourd",
+      "léger",
+      "gros",
+      "mince",
+      "belle",
+      "jolie",
+      "moche",
+      "bête",
+      "sage",
+      "fou",
+      "luron",
+      "mouah",
+      "tchac",
+      "ronin",
+      "touff",
+      "bongo",
+      "gromp",
+      "zigue",
+      "tchin",
+      "kaput",
+      "malin",
+      "drôle",
+      "calme",
+      "rude",
+      "gentil",
+    ];
+    jsonData.gameCanvas = {
+      time: jsonData.countdown,
+      type: "game2",
+      infos: {
+        mot: words[Math.floor(Math.random() * words.length)],
+      },
+    };
+
+    writeGame(jsonData);
+  });
 }
 
 setInterval(() => {
@@ -587,27 +714,43 @@ function checkWin() {
     if (jsonData.game.gameCanvas.type == "game1") {
       Object.keys(jsonData.positions).map((joueur) => {
         if (jsonData.positions[joueur].status != "off") {
-    
           if (
-            jsonData.positions[joueur].x > jsonData.game.gameCanvas.infos.carre1.x &&
-            jsonData.positions[joueur].x < jsonData.game.gameCanvas.infos.carre1.x2
+            jsonData.positions[joueur].x >
+              jsonData.game.gameCanvas.infos.carre1.x &&
+            jsonData.positions[joueur].x <
+              jsonData.game.gameCanvas.infos.carre1.x2
           ) {
             if (
               jsonData.positions[joueur].y >
                 jsonData.game.gameCanvas.infos.carre1.y &&
-              jsonData.positions[joueur].y < jsonData.game.gameCanvas.infos.carre1.y2
+              jsonData.positions[joueur].y <
+                jsonData.game.gameCanvas.infos.carre1.y2
             ) {
-              jsonData.positions[joueur].score = jsonData.positions[joueur].score+1
+              jsonData.positions[joueur].score =
+                jsonData.positions[joueur].score + 1;
             }
           }
         }
       });
+    } else if (jsonData.game.gameCanvas.type == "game2") {
+      Object.keys(jsonData.positions).map((joueur) => {
+        if (jsonData.positions[joueur].status != "off") {
+          if (
+            jsonData.positions[joueur].text
+              .toLowerCase()
+              .includes(jsonData.game.gameCanvas.infos.mot)
+          ) {
+            jsonData.positions[joueur].score =
+              jsonData.positions[joueur].score + 1;
+          }
+        }
+      });
     }
-    jsonData.game.gameCanvas = {}
-    jsonData.game.status = "pause"
-    jsonData.game.countdown = 3
+    jsonData.game.gameCanvas = {};
+    jsonData.game.status = "pause";
+    jsonData.game.countdown = 3;
     writeGame(jsonData.game);
-    writePositions(jsonData.positions)
+    writePositions(jsonData.positions);
   });
 }
 

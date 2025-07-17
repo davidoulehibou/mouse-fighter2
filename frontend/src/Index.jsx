@@ -6,6 +6,7 @@ import "./App.css";
 import PlayerList from "./PlayerList";
 import Game1 from "./gameCanvas/Game1";
 import RideauSvg from "./utils/RideauSvg";
+import Game2 from "./gameCanvas/Game2";
 
 function Index() {
   const [pseudo, setPseudo] = useState(null);
@@ -144,6 +145,7 @@ function Index() {
 
   const gamesMap = {
     game1: <Game1 gameData={gameData ? gameData : null}/>,
+    game2: <Game2 gameData={gameData ? gameData : null}/>,
   };
 
   return (
