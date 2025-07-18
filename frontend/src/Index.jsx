@@ -4,11 +4,11 @@ import CanvasMouses from "./CanvasMouses";
 import Overlay from "./utils/Overlay";
 import "./App.css";
 import PlayerList from "./PlayerList";
-import Game1 from "./gameCanvas/Game1";
-import RideauSvg from "./utils/RideauSvg";
-import Game2 from "./gameCanvas/Game2";
+import { useParams } from "react-router-dom";
 
 function Index() {
+  const { param } = useParams();
+  console.log(param)
   const [pseudo, setPseudo] = useState(null);
   const [error, setError] = useState(null);
   const [positions, setPositions] = useState({

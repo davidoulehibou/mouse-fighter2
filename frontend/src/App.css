@@ -37,6 +37,7 @@ body {
 form {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 12px;
   max-width: 300px;
   margin: 100px auto;
@@ -56,14 +57,19 @@ h1 {
   margin: 0;
 }
 
-.pseudo {
+form p{
+  margin:0
+}
+
+form input[type="text"] {
   padding: 10px;
   border: 1px solid #aaa;
   border-radius: 6px;
   font-size: 1rem;
+  width:100%;
 }
 
-.bouton {
+form input[type="submit"], button {
   padding: 10px;
   background-color: #1976d2;
   color: white;
@@ -74,7 +80,7 @@ h1 {
   transition: background-color 0.2s;
 }
 
-.bouton:hover {
+button:hover, form input[type="submit"]:hover {
   background-color: #1565c0;
 }
 

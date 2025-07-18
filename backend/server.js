@@ -4,742 +4,96 @@ const fs = require("fs");
 const path = require("path");
 const dataFile = path.join(__dirname, "data.json");
 const WebSocket = require("ws");
+const pool = require("./db");
 
 const app = express();
 const port = 3000;
 
-app.use(cors()); // ✅ autorise toutes les origines (par défaut)
-
-// WebSocket
+app.use(cors());
 const wss = new WebSocket.Server({ port: 8080 });
 
-setInterval(() => {
-  wss.clients.forEach((ws) => {
-    if (ws.isAlive === false) {
-      console.log("Client inactif, fermeture forcée");
-      return ws.terminate();
-    }
+const getRoomData = async (roomCode) => {
+  try {
+    const conn = await pool.getConnection();
+    const result = await conn.query("SELECT * FROM rooms WHERE roomcode = ?", [
+      roomCode,
+    ]);
+    const players = await conn.query(
+      "SELECT * FROM joueurs WHERE roomcode = ?",
+      [roomCode]
+    );
+    conn.release();
 
-    ws.isAlive = false;
-    ws.ping();
-  });
-}, 30000);
+    if (result.length === 0) return null;
 
-const writeQueue = [];
-let isWriting = false;
+    return {
+      room: result[0],
+      players: players || [],
+    };
+  } catch (err) {
+    console.error(
+      "Erreur lors de la récupération des données de la room :",
+      err
+    );
+    return null;
+  }
+};
 
-function queueWrite() {
-  if (isWriting || writeQueue.length === 0) return;
+wss.on("connection", async (ws, req) => {
+  const params = new URLSearchParams(req.url.replace(/^\/\?/, ""));
+  const roomCode = params.get("room");
 
-  isWriting = true;
-  const { type, data, resolve, reject } = writeQueue.shift();
-
-  fs.readFile(dataFile, "utf8", (err, fileData) => {
-    if (err) {
-      console.error("Erreur de lecture:", err);
-      return;
-    }
-
-    let jsonData;
-    try {
-      jsonData = JSON.parse(fileData);
-    } catch (parseErr) {
-      isWriting = false;
-      reject(parseErr);
-      queueWrite();
-      return;
-    }
-
-    if (type == "position") {
-      jsonData.positions = data;
-    } else if (type == "game") {
-      jsonData.game = data;
-    }
-
-    fs.writeFile(dataFile, JSON.stringify(jsonData, null, 2), "utf8", (err) => {
-      isWriting = false;
-
-      if (err) {
-        console.error("Erreur d'écriture:", err);
-        reject(err);
-      } else {
-        resolve();
-      }
-
-      queueWrite(); // continue la queue
-    });
-  });
-}
-
-function writePositions(data) {
-  return new Promise((resolve, reject) => {
-    writeQueue.push({ type: "position", data, resolve, reject });
-    queueWrite();
-  });
-}
-
-function writeGame(data) {
-  return new Promise((resolve, reject) => {
-    writeQueue.push({ type: "game", data, resolve, reject });
-    queueWrite();
-  });
-}
-
-function updateContentByX(joueur, x, y, status) {
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) {
-      console.error("Erreur de lecture:", err);
-
-      return;
-    }
-
-    let jsonData;
-    try {
-      jsonData = JSON.parse(data).positions;
-    } catch (parseErr) {
-      console.log("prout de zut", parseErr);
-      updateContentByX(joueur, x, y, status);
-      return;
-    }
-
-    if (jsonData[joueur]) {
-      jsonData[joueur].x = x;
-      jsonData[joueur].y = y;
-      jsonData[joueur].status = status;
-    } else {
-      console.log("prout");
-      console.warn(`Le joueur "${joueur}" n'existe pas dans le fichier.`);
-
-      return;
-    }
-
-    writePositions(jsonData);
-  });
-}
-
-function updateText(joueur, text) {
-  console.log("updateText()", text);
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) {
-      console.error("Erreur de lecture:", err);
-      return;
-    }
-
-    let jsonData;
-
-    try {
-      jsonData = JSON.parse(data).positions;
-    } catch (parseErr) {
-      console.error("Erreur de parsing JSON:", parseErr);
-      return;
-    }
-
-    if (jsonData[joueur]) {
-      jsonData[joueur].text = text;
-    } else {
-      console.warn(`Le joueur "${joueur}" n'existe pas dans le fichier.`);
-      return;
-    }
-
-    writePositions(jsonData);
-  });
-}
-
-function broadcastJson() {
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) return;
-    try {
-      const jsonData = JSON.parse(data);
-      wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(jsonData));
-        }
-      });
-    } catch {}
-  });
-}
-
-wss.on("connection", (ws) => {
+  ws.roomCode = roomCode;
   ws.isAlive = true;
 
-  ws.on("pong", () => {
-    ws.isAlive = true;
-  });
+  ws.on("pong", () => (ws.isAlive = true));
 
-  // ton code existant ici :
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (!err) {
-      try {
-        ws.send(data);
-      } catch {}
-    }
-
-    ws.on("close", (code, reason) => {
-      console.log("deconnexion:", reason.toString());
-      resetPlayerStatusByName(reason.toString(), 0, 0, "off");
-    });
-  });
+  broadcastToRoom(roomCode);
 });
 
-function resetPlayerStatusByName(id) {
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) {
-      console.error("Erreur de lecture:", err);
-      return;
-    }
+const broadcastToRoom = async (roomCode) => {
+  const roomData = await getRoomData(roomCode);
 
-    let jsonData;
-    try {
-      jsonData = JSON.parse(data).positions;
-    } catch (parseErr) {
-      console.error("Erreur de parsing JSON:", parseErr);
-      return;
-    }
-
-    function trouverJoueurParStatus(statusRecherche) {
-      for (const [nomJoueur, info] of Object.entries(jsonData)) {
-        if (info.status === statusRecherche) {
-          return { nom: nomJoueur, ...info };
-        }
-      }
-      return null; // Aucun joueur trouvé avec ce status
-    }
-
-    const joueursInfos = trouverJoueurParStatus(id);
-    if (joueursInfos) {
-      jsonData[joueursInfos.nom].status = "off";
-      jsonData[joueursInfos.nom].x = 0;
-      jsonData[joueursInfos.nom].y = 0;
-    }
-
-    writePositions(jsonData);
-  });
-}
-
-fs.watch(dataFile, (eventType) => {
-  if (eventType === "change") broadcastJson();
-});
-
-// 🚀 Route HTTP pour changer le contenu selon x
-app.get("/api/set-x", (req, res) => {
-  const x = parseFloat(req.query.x);
-  const y = parseFloat(req.query.y);
-  const joueur = req.query.joueur;
-  const status = req.query.status;
-  if (isNaN(x)) {
-    return res.status(400).send({ error: 'Paramètre "x" invalide' });
-  }
-  if (isNaN(y)) {
-    return res.status(400).send({ error: 'Paramètre "y" invalide' });
-  }
-
-  updateContentByX(joueur, x, y, status);
-  res.send({ success: true, x, y });
-});
-
-app.get("/api/isplayerexist", (req, res) => {
-  const name = req.query.name;
-
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) {
-      console.error("Erreur de lecture:", err);
-      return res.status(500).json({ error: "Erreur de lecture du fichier" });
-    }
-
-    let jsonData;
-    try {
-      jsonData = JSON.parse(data).positions;
-    } catch (parseErr) {
-      console.error("Erreur de parsing JSON:", parseErr);
-      return res.status(500).json({ error: "Erreur de parsing JSON" });
-    }
-
-    // Recherche d’un joueur dont le status est égal à name
-    const matchingKey = Object.keys(jsonData).find(
-      (key) => jsonData[key].status === name
-    );
-
-    if (matchingKey) {
-      // Joueur trouvé
-      res.json({
-        exists: true,
-        joueur: matchingKey,
-        data: jsonData[matchingKey],
-      });
-    } else {
-      // Aucun joueur avec ce status
-      res.json({ exists: false });
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN && client.roomCode === roomCode) {
+      client.send(JSON.stringify({ type: "room-update", roomData }));
     }
   });
-});
+};
 
-app.get("/api/createPlayer", (req, res) => {
-  const name = req.query.name;
+//game
 
-  if (!name) {
-    return res.status(400).json({ error: "Le nom du joueur est requis." });
-  }
-
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) {
-      console.error("Erreur de lecture:", err);
-      return res.status(500).json({ error: "Erreur de lecture du fichier" });
+setInterval(async () => {
+  const conn = await pool.getConnection();
+  const result = await conn.query(
+    "SELECT roomcode,status, countdown FROM rooms "
+  );
+  conn.release();
+  console.log(result);
+  result.map(async (room) => {
+    let newCountdown = room.countdown - 1;
+    let newStatus = room.status;
+    if (newCountdown < 0 && room.status == "pause") {
+      newStatus = "play";
+      newCountdown = 10;
+    } else if (newCountdown < 0 && room.status == "play") {
+      newStatus = "pause";
+      newCountdown = 5;
     }
-
-    let jsonData;
     try {
-      jsonData = JSON.parse(data).positions;
-    } catch (parseErr) {
-      console.error("Erreur de parsing JSON:", parseErr);
-      return res.status(500).json({ error: "Erreur de parsing JSON" });
+      const conn = await pool.getConnection();
+      await conn.query(
+        "UPDATE rooms SET status = ?, countdown = ? WHERE roomcode = ?",
+        [newStatus, newCountdown, room.roomcode]
+      );
+      conn.release();
+    } catch (err) {
+      console.error(err);
     }
-
-    // Cherche un joueur disponible (status = "off")
-    const availableKey = Object.keys(jsonData).find(
-      (key) => jsonData[key].status === "off"
-    );
-
-    if (!availableKey) {
-      return res.json({ success: false, playerSlot: null });
-    }
-
-    // Attribue les infos au joueur libre
-    jsonData[availableKey].status = name;
-    jsonData[availableKey].x = 0;
-    jsonData[availableKey].y = 0;
-    jsonData[availableKey].text = "";
-    jsonData[availableKey].score = 0;
-
-    // Sauvegarde
-    writePositions(jsonData)
-      .then(() => {
-        res.json({ success: true, playerSlot: availableKey });
-      })
-      .catch((writeErr) => {
-        console.error("Erreur d'écriture:", writeErr);
-        res.status(500).json({ error: "Erreur d'écriture" });
-      });
-  });
-});
-
-app.get("/api/settext", (req, res) => {
-  const joueur = req.query.joueur;
-  const text = req.query.text;
-
-  console.log("api settext", text);
-
-  if (!joueur || typeof text !== "string") {
-    return res
-      .status(400)
-      .json({ success: false, error: "Paramètres invalides" });
-  }
-
-  // Commande spéciale : /reset
-  if (text === "/reset") {
-    resetPlayers();
-    return res.json({ success: true, message: "Joueurs réinitialisés" });
-  }
-
-  // Commande spéciale : /points utilisateurX 120
-  if (text.includes("/points")) {
-    const parts = text.split(" ");
-    const utilisateur = parts[1];
-    const points = Number(parts[2]);
-
-    if (
-      points &&
-      [
-        "joueur1",
-        "joueur2",
-        "joueur3",
-        "joueur4",
-        "joueur5",
-        "joueur6",
-        "joueur7",
-        "joueur8",
-      ].includes(utilisateur)
-    ) {
-      console.log("ajout de points");
-      addPoints(utilisateur, points);
-      return res.json({
-        success: true,
-        message: `Ajouté ${points} points à ${utilisateur}`,
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        error: "Commande /points mal formée ou joueur inconnu",
-      });
-    }
-  }
-
-  // Texte standard
-  updateText(joueur, text);
-
-  // Planification de l'effacement dans 5 secondes
-  setTimeout(() => {
-    fs.readFile(dataFile, "utf8", (err, data) => {
-      if (err) {
-        console.error("Erreur de lecture:", err);
-        return;
-      }
-
-      let jsonData;
-      try {
-        jsonData = JSON.parse(data).positions;
-      } catch (parseErr) {
-        console.error("Erreur de parsing JSON:", parseErr);
-        return;
-      }
-
-      if (jsonData[joueur]?.text === text) {
-        updateText(joueur, "");
-      }
-    });
-  }, 7000);
-
-  // Réponse immédiate au client
-  return res.json({ success: true, message: "Texte mis à jour avec succès" });
-});
-
-function addPoints(utilisateur, points) {
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) {
-      console.error("Erreur de lecture:", err);
-      return;
-    }
-
-    let jsonData;
-
-    try {
-      jsonData = JSON.parse(data).positions;
-    } catch (parseErr) {
-      console.error("Erreur de parsing JSON:", parseErr);
-      return;
-    }
-
-    if (jsonData[utilisateur]) {
-      jsonData[utilisateur].score = jsonData[utilisateur].score + points;
-    } else {
-      console.warn(`Le joueur "${utilisateur}" n'existe pas dans le fichier.`);
-      return;
-    }
-
-    writePositions(jsonData);
-  });
-}
-
-function resetPlayers() {
-  writePositions({
-    joueur1: {
-      status: "off",
-      color: "#ff0000",
-      x: 0,
-      y: 0,
-      text: "",
-      score: 0,
-      dead: false,
-      malus: {},
-    },
-    joueur2: {
-      status: "off",
-      color: "#0000ff",
-      x: 0,
-      y: 0,
-      text: "",
-      score: 0,
-      dead: false,
-      malus: {},
-    },
-    joueur3: {
-      status: "off",
-      color: "#ffff00",
-      x: 0,
-      y: 0,
-      text: "",
-      score: 0,
-      dead: false,
-      malus: {},
-    },
-    joueur4: {
-      status: "off",
-      color: "#008000",
-      x: 0,
-      y: 0,
-      text: "",
-      score: 0,
-      dead: false,
-      malus: {},
-    },
-    joueur5: {
-      status: "off",
-      color: "#ffffff",
-      x: 0,
-      y: 0,
-      text: "",
-      score: 0,
-      dead: false,
-      malus: {},
-    },
-    joueur6: {
-      status: "off",
-      color: "#ffa500",
-      x: 0,
-      y: 0,
-      text: "",
-      score: 0,
-      dead: false,
-      malus: {},
-    },
-    joueur7: {
-      status: "off",
-      color: "#8a2be2",
-      x: 0,
-      y: 0,
-      text: "",
-      score: 0,
-      dead: false,
-      malus: {},
-    },
-    joueur8: {
-      status: "off",
-      color: "#808080",
-      x: 0,
-      y: 0,
-      text: "",
-      score: 0,
-      dead: false,
-      malus: {},
-    },
-  });
-}
-
-//games
-
-function newGame() {
-  const gamelist = [game1, game2];
-
-  const game = gamelist[Math.floor(Math.random() * gamelist.length)];
-
-  game();
-}
-
-function game1() {
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) {
-      console.error("Erreur de lecture:", err);
-      return;
-    }
-    let jsonData;
-    try {
-      jsonData = JSON.parse(data).game;
-    } catch (parseErr) {
-      console.error("Erreur de parsing JSON:", parseErr);
-      return;
-    }
-    jsonData.status = "play";
-    jsonData.countdown = 5;
-    let posx = Math.random() * 0.8;
-    let posy = Math.random() * 0.8;
-    let posx2 = posx + Math.random() * (0.2 - 0.1) + 0.1;
-    let posy2 = posy + Math.random() * (0.2 - 0.1) + 0.1;
-    jsonData.gameCanvas = {
-      time: jsonData.countdown,
-      type: "game1",
-      infos: {
-        carre1: {
-          x: posx,
-          y: posy,
-          x2: posx2,
-          y2: posy2,
-        },
-      },
-    };
-
-    writeGame(jsonData);
-  });
-}
-
-function game2() {
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) {
-      console.error("Erreur de lecture:", err);
-      return;
-    }
-    let jsonData;
-    try {
-      jsonData = JSON.parse(data).game;
-    } catch (parseErr) {
-      console.error("Erreur de parsing JSON:", parseErr);
-      return;
-    }
-    jsonData.status = "play";
-    jsonData.countdown = 5;
-    let words = [
-      "caca",
-      "prout",
-      "zizi",
-      "popo",
-      "dodo",
-      "pipi",
-      "bidet",
-      "pouet",
-      "zinzin",
-      "chien",
-      "chat",
-      "maison",
-      "table",
-      "chaud",
-      "froid",
-      "banal",
-      "plage",
-      "poule",
-      "tasse",
-      "clown",
-      "gogos",
-      "bouse",
-      "groin",
-      "gloup",
-      "baffe",
-      "livre",
-      "nuit",
-      "croco",
-      "niais",
-      "dinde",
-      "lune",
-      "rouge",
-      "bleue",
-      "blanc",
-      "jaune",
-      "vert",
-      "rire",
-      "pleur",
-      "singe",
-      "bambin",
-      "fifou",
-      "tarte",
-      "crazy",
-      "coucou",
-      "kiki",
-      "boule",
-      "tigre",
-      "pomme",
-      "poire",
-      "banane",
-      "neige",
-      "pluie",
-      "nuage",
-      "soleil",
-      "vent",
-      "mince",
-      "moche",
-      "sage",
-      "fou",
-      "luron",
-      "bongo",
-      "zigue",
-      "kaput",
-      "malin",
-      "calme",
-      "rude",
-      "gentil",
-    ];
-    jsonData.gameCanvas = {
-      time: jsonData.countdown,
-      type: "game2",
-      infos: {
-        mot: words[Math.floor(Math.random() * words.length)],
-      },
-    };
-
-    writeGame(jsonData);
-  });
-}
-
-setInterval(() => {
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) {
-      console.error("Erreur de lecture:", err);
-      return;
-    }
-    let jsonData;
-    try {
-      jsonData = JSON.parse(data).game;
-    } catch (parseErr) {
-      console.error("Erreur de parsing JSON:", parseErr);
-      return;
-    }
-    jsonData.countdown = jsonData.countdown - 1;
-    if (jsonData.countdown < 0) {
-      jsonData.countdown = 10;
-      if (jsonData.status == "play") {
-        jsonData.status = "pause";
-        checkWin();
-      } else if (jsonData.status == "pause") {
-        writeGame(jsonData);
-        newGame();
-      }
-    }
-    writeGame(jsonData);
+    broadcastToRoom(room.roomcode);
   });
 }, 1000);
 
-function checkWin() {
-  fs.readFile(dataFile, "utf8", (err, data) => {
-    if (err) {
-      console.error("Erreur de lecture:", err);
-      return;
-    }
-    let jsonData;
-    try {
-      jsonData = JSON.parse(data);
-    } catch (parseErr) {
-      console.error("Erreur de parsing JSON:", parseErr);
-      return;
-    }
-    if (jsonData.game.gameCanvas.type == "game1") {
-      Object.keys(jsonData.positions).map((joueur) => {
-        if (jsonData.positions[joueur].status != "off") {
-          if (
-            jsonData.positions[joueur].x >
-              jsonData.game.gameCanvas.infos.carre1.x &&
-            jsonData.positions[joueur].x <
-              jsonData.game.gameCanvas.infos.carre1.x2
-          ) {
-            if (
-              jsonData.positions[joueur].y >
-                jsonData.game.gameCanvas.infos.carre1.y &&
-              jsonData.positions[joueur].y <
-                jsonData.game.gameCanvas.infos.carre1.y2
-            ) {
-              jsonData.positions[joueur].score =
-                jsonData.positions[joueur].score + 1;
-            }
-          }
-        }
-      });
-    } else if (jsonData.game.gameCanvas.type == "game2") {
-      Object.keys(jsonData.positions).map((joueur) => {
-        if (jsonData.positions[joueur].status != "off") {
-          if (
-            jsonData.positions[joueur].text
-              .toLowerCase()
-              .includes(jsonData.game.gameCanvas.infos.mot)
-          ) {
-            jsonData.positions[joueur].score =
-              jsonData.positions[joueur].score + 1;
-          }
-        }
-      });
-    }
-    jsonData.game.gameCanvas = {};
-    jsonData.game.status = "pause";
-    jsonData.game.countdown = 3;
-    writeGame(jsonData.game);
-    writePositions(jsonData.positions);
-  });
-}
-
 app.listen(port, () => {
-  console.log(`Serveur HTTP sur http://localhost:${port}`);
+  console.log(`Backend running on http://localhost:${port}`);
 });

@@ -27,7 +27,7 @@ function Connect({ handlePseudo, error }) {
           placeholder="Entrez votre pseudo"
           maxLength="20"
         />
-        <button type="submit" className="bouton">
+        <button type="submit">
           Se connecter
         </button>
         {error === "exists" && <p className="error">Le joueur existe déjà</p>}
