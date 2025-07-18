@@ -13,8 +13,19 @@ function RoomInput({error}) {
     }
   };
 
-  const createRandomRoom = () => {
-    const randomId = Math.floor(100000 + Math.random() * 900000); // 6 chiffres
+  const createRandomRoom = async() => {
+    const randomId = Math.floor(100000 + Math.random() * 900000);
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_URL
+        }/api/createRoom?room=${randomId}`
+      );
+      let result = await response.text();
+    } catch (err) {
+      console.error("Erreur lors de l'appel API:", err);
+    }
+
     navigate(`/${randomId}`);
   };
 

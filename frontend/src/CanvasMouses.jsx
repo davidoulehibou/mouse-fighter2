@@ -5,7 +5,7 @@ import RideauSvg from "./utils/RideauSvg";
 import Game1 from "./gameCanvas/Game1";
 import Game2 from "./gameCanvas/Game2";
 
-const CanvasMouses = ({ positions, pseudo, gameData, playerId }) => {
+const CanvasMouses = ({handleMouseMove, positions, pseudo, gameData, playerId }) => {
   const gameStatus = gameData.status;
   const canvasRef = useRef(null);
 
@@ -59,23 +59,21 @@ const CanvasMouses = ({ positions, pseudo, gameData, playerId }) => {
       })
     }
 
-    if (numJoueur) {
-      handleSetX(
-        numJoueur,
+    if (playerId) {
+      handleMouseMove(
         mousePosition.x / windowSize.width,
-        mousePosition.y / windowSize.height,
-        pseudo
+        mousePosition.y / windowSize.height
       );
     }
   }, [windowSize, mousePosition, pseudo]);
 
-  const handleSetX = async (joueur, x, y, status) => {
+  const handleSetX = async (joueur, x, y, room) => {
     if (pseudo) {
       try {
         await fetch(
           `${
             import.meta.env.VITE_URL
-          }/api/set-x?joueur=${joueur}&x=${x}&y=${y}&status=${status}`
+          }/api/movexy?joueur=${joueur}&x=${x}&y=${y}&room=${room}`
         );
       } catch (err) {
         console.error("Erreur appel HTTP:", err);

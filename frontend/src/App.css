@@ -133,7 +133,7 @@ form > div {
 }
 
 .gameTimer rect {
-  transition: width 1s steps(5, jump-start), fill 1s;
+  transition: width 1s steps(5, jump-start), fill 0.5s;
 }
 
 canvas {

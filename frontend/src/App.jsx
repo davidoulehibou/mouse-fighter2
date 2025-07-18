@@ -9,7 +9,7 @@ function App() {
   const [error, setError] = useState(null);
 
   const handleError = (err) => {
-    setError(err.message);
+    setError(err);
   };
   return (
     <BrowserRouter>
