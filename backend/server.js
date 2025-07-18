@@ -46,10 +46,42 @@ wss.on("connection", async (ws, req) => {
   ws.roomCode = roomCode;
   ws.isAlive = true;
 
+  if (!roomCode) {
+    ws.close(1008, "Code de room manquant");
+    return;
+  }
+
   ws.on("pong", () => (ws.isAlive = true));
 
   broadcastToRoom(roomCode);
 });
+
+const interval = setInterval(() => {
+  wss.clients.forEach((ws) => {
+    if (!ws.isAlive) return ws.terminate();
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 30000);
+
+wss.on("message", async (message) => {
+  try {
+    const data = JSON.parse(message);
+    if (data.type === "get-room") {
+      const roomData = await getRoomData(ws.roomCode);
+      if (roomData) {
+        ws.send(JSON.stringify({ type: "room-update", roomData }));
+      } else {
+        ws.send(JSON.stringify({ type: "error", error: "Room non trouvée" }));
+      }
+    }
+  } catch (err) {
+    console.error("Erreur lors du traitement du message WebSocket :", err);
+    ws.send(JSON.stringify({ type: "error", error: "Message invalide" }));
+  }
+});
+
+wss.on("close", () => clearInterval(interval));
 
 const broadcastToRoom = async (roomCode) => {
   const roomData = await getRoomData(roomCode);
@@ -61,6 +93,27 @@ const broadcastToRoom = async (roomCode) => {
   });
 };
 
+app.get("/api/createPlayer", async (req, res) => {
+  const { room, name } = req.query;
+  let playerId = 0
+
+  try {
+    console.log(room, name);
+    const conn = await pool.getConnection();
+    const okPacket = await conn.query(
+      "INSERT INTO joueurs (nom, roomcode) VALUES (?, ?); ",
+      [name, room]
+    );
+    conn.release();
+    playerId = Number(okPacket.insertId)
+  } catch (err) {
+    console.error(err);
+    return res.json({ success: false, playerId: null });
+  }
+
+  return res.json({ success: true, playerId: playerId });
+});
+
 //game
 
 setInterval(async () => {
@@ -69,16 +122,15 @@ setInterval(async () => {
     "SELECT roomcode,status, countdown FROM rooms "
   );
   conn.release();
-  console.log(result);
   result.map(async (room) => {
     let newCountdown = room.countdown - 1;
     let newStatus = room.status;
     if (newCountdown < 0 && room.status == "pause") {
       newStatus = "play";
-      newCountdown = 10;
+      newCountdown = 5;
     } else if (newCountdown < 0 && room.status == "play") {
       newStatus = "pause";
-      newCountdown = 5;
+      newCountdown = 3;
     }
     try {
       const conn = await pool.getConnection();

@@ -32,10 +32,6 @@ function Connect({ handlePseudo, error }) {
         </button>
         {error === "exists" && <p className="error">Le joueur existe déjà</p>}
         {error === "full" && <p className="error">Il y a déjà trop de monde</p>}
-        <p>
-          En te connectant, tu acceptes les cookies mais bon ça va c'est juste le
-          nom du joueur qu'est enregistré
-        </p>
       </form>
     </div>
   );

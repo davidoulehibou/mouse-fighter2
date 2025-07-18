@@ -5,11 +5,13 @@ import RideauSvg from "./utils/RideauSvg";
 import Game1 from "./gameCanvas/Game1";
 import Game2 from "./gameCanvas/Game2";
 
-const CanvasMouses = ({ positions, playerId, gameData }) => {
+const CanvasMouses = ({ positions, pseudo, gameData, playerId }) => {
   const gameStatus = gameData.status;
   const canvasRef = useRef(null);
 
   const [numJoueur, setNumJoueur] = useState(null);
+
+  const [joueurData, setJoueurData] = useState(null)
 
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -48,14 +50,13 @@ const CanvasMouses = ({ positions, playerId, gameData }) => {
   }, []);
 
   useEffect(() => {
-    if (playerId) {
-      Object.keys(positions).forEach((joueur) => {
-        if (positions[joueur].status == playerId) {
-          setNumJoueur(joueur);
+    
+    if(playerId){
+      positions.map((joueur) => {
+        if(joueur.id == playerId){
+          setJoueurData(joueur)
         }
-      });
-    } else {
-      setNumJoueur(null);
+      })
     }
 
     if (numJoueur) {
@@ -63,13 +64,13 @@ const CanvasMouses = ({ positions, playerId, gameData }) => {
         numJoueur,
         mousePosition.x / windowSize.width,
         mousePosition.y / windowSize.height,
-        playerId
+        pseudo
       );
     }
-  }, [windowSize, mousePosition, playerId]);
+  }, [windowSize, mousePosition, pseudo]);
 
   const handleSetX = async (joueur, x, y, status) => {
-    if (playerId) {
+    if (pseudo) {
       try {
         await fetch(
           `${
@@ -186,26 +187,24 @@ const CanvasMouses = ({ positions, playerId, gameData }) => {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    Object.keys(positions).forEach((joueur) => {
-      const { x, y, color, status, text } = positions[joueur];
+    positions.map((joueur) => {
+      const { x, y, color,nom, text } = joueur;
 
       let posx;
       let posy;
 
-      if (status != playerId) {
+      if (nom != pseudo) {
         posx = x * windowSize.width;
         posy = y * windowSize.height;
       } else if (mousePosition) {
         posx = mousePosition.x;
         posy = mousePosition.y;
       }
+      drawPlayer(ctx, nom.charAt(0).toUpperCase(), posx, posy, color);
 
-      if (status !== "off") {
-        drawPlayer(ctx, status.charAt(0).toUpperCase(), posx, posy, color);
-      }
 
-      if (text != "") {
-        drawSpeechBubble(ctx, text, posx, posy - 10, color, status);
+      if (text) {
+        drawSpeechBubble(ctx, text, posx, posy - 10, color, nom);
       }
     });
   }, [positions, windowSize, mousePosition]);
@@ -218,12 +217,11 @@ const CanvasMouses = ({ positions, playerId, gameData }) => {
   return (
     <>
       <RideauSvg
-        color={numJoueur ? positions[numJoueur].color : "grey"}
-        score={numJoueur ? positions[numJoueur].score : 0}
+        color={joueurData ? joueurData.color : "grey"}
         dataGame={gameStatus}
       />
 
-      {gameStatus == "play" && gamesMap[gameData.gameCanvas.type]}
+      {/* {gameStatus == "play" && gamesMap[gameData.type]} */}
 
       <canvas
         className="canvasMouse"
@@ -233,15 +231,15 @@ const CanvasMouses = ({ positions, playerId, gameData }) => {
           top: 0,
           left: 0,
           backgroundImage: `radial-gradient(circle,
-            ${numJoueur ? positions[numJoueur].color : "#000000"}05 10%,
-             ${numJoueur ? positions[numJoueur].color : "#000000"}90 40%)`,
+            ${joueurData ? joueurData.color : "#000000"}05 10%,
+             ${joueurData ? joueurData.color : "#000000"}90 40%)`,
           backgroundPosition: "center",
           backgroundSize: gameStatus == "play" ? "700%" : "200%",
           outline: "white 100000px solid",
           transform: "scale(1)",
         }}
       ></canvas>
-      {numJoueur && <TextInput joueur={numJoueur} name={playerId} />}
+      {numJoueur && <TextInput joueur={numJoueur} name={pseudo} />}
     </>
   );
 };
