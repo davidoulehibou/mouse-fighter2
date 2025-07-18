@@ -4,8 +4,6 @@ const fs = require("fs");
 const path = require("path");
 const dataFile = path.join(__dirname, "data.json");
 const WebSocket = require("ws");
-const { json } = require("stream/consumers");
-const { count } = require("console");
 
 const app = express();
 const port = 3000;
@@ -516,7 +514,7 @@ function resetPlayers() {
   });
 }
 
-//game
+//games
 
 function newGame() {
   const gamelist = [game1, game2];
@@ -586,7 +584,6 @@ function game2() {
       "pipi",
       "bidet",
       "pouet",
-      "gnouf",
       "zinzin",
       "chien",
       "chat",
@@ -602,19 +599,13 @@ function game2() {
       "gogos",
       "bouse",
       "groin",
-      "pouah",
       "gloup",
       "baffe",
       "livre",
       "nuit",
       "croco",
-      "pifou",
       "niais",
-      "babou",
-      "cibou",
-      "zigou",
       "dinde",
-      "ronzo",
       "lune",
       "rouge",
       "bleue",
@@ -625,14 +616,12 @@ function game2() {
       "pleur",
       "singe",
       "bambin",
-      "goglu",
       "fifou",
       "tarte",
       "crazy",
       "coucou",
       "kiki",
       "boule",
-      "guano",
       "tigre",
       "pomme",
       "poire",
@@ -651,7 +640,6 @@ function game2() {
       "zigue",
       "kaput",
       "malin",
-      "drôle",
       "calme",
       "rude",
       "gentil",

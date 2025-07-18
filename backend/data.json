@@ -83,17 +83,12 @@
   },
   "game": {
     "status": "play",
-    "countdown": 4,
+    "countdown": 2,
     "gameCanvas": {
       "time": 5,
-      "type": "game1",
+      "type": "game2",
       "infos": {
-        "carre1": {
-          "x": 0.00009414479713800717,
-          "y": 0.24492923690385826,
-          "x2": 0.1854623439280953,
-          "y2": 0.4323697907329396
-        }
+        "mot": "niais"
       }
     }
   }
