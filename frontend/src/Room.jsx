@@ -19,7 +19,9 @@ const Room = ({ handleError }) => {
   const ws = useRef(null);
 
   useEffect(() => {
-    ws.current = new WebSocket(`ws://localhost:8080/?room=${param}`);
+    ws.current = new WebSocket(
+      `${import.meta.env.VITE_WEB_SOCKET}?room=${param}`
+    );
 
     ws.current.onopen = () => {
       console.log("WebSocket connecté");
