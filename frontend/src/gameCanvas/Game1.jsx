@@ -8,7 +8,7 @@ const Game1 = ({ gameData }) => {
     y: 0,
   });
 
-  const infos = gameData.gameCanvas.infos
+  const infos = gameData.infos
 
   useEffect(() => {
     // Mettre à jour la position de la souris

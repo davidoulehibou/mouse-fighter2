@@ -32,6 +32,7 @@ function Connect({ handlePseudo, error }) {
         </button>
         {error === "exists" && <p className="error">Le joueur existe déjà</p>}
         {error === "full" && <p className="error">Il y a déjà trop de monde</p>}
+        <p>Si tous les joueurs se deconnectent, la room sera supprimée</p>
       </form>
     </div>
   );

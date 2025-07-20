@@ -208,7 +208,9 @@ const CanvasMouses = ({handleMouseMove, positions, pseudo, gameData, playerId })
         dataGame={gameStatus}
       />
 
-      {/* {gameStatus == "play" && gamesMap[gameData.type]} */}
+
+
+      {gameStatus == "play" && gamesMap[gameData.type]}
 
       <canvas
         className="canvasMouse"

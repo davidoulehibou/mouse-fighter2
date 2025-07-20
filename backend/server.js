@@ -1,5 +1,5 @@
 const express = require("express");
-const cors = require("cors"); 
+const cors = require("cors");
 const WebSocket = require("ws");
 
 const app = express();
@@ -11,6 +11,8 @@ const rooms = new Map();
 
 app.use(cors());
 const wss = new WebSocket.Server({ port: 8080 });
+
+//========== JOUEURS ====================
 
 // Connexion d'un joueur dans une room
 
@@ -69,44 +71,15 @@ const deconnectPlayer = async (playerId, roomCode) => {
     const roomPlayers = memoryPositions.get(roomCode);
     roomPlayers.delete(playerId);
 
+    // Supprimer l'entrée si plus aucun joueur
     if (roomPlayers.size === 0) {
       memoryPositions.delete(roomCode);
+      rooms.delete(roomCode); // Suppression de la room
     }
   }
 };
-
 
 // récupérer les infos de la room avant l'envoi
-
-const getRoomData = async (roomCode) => {
-  if (!rooms.has(roomCode)) return null;
-  return { room: rooms.get(roomCode) };
-};
-
-// envoyer les infos à la room
-
-const broadcastRoomToRoom = async (roomCode) => {
-  const roomData = await getRoomData(roomCode);
-
-  if (!roomData) {
-    wss.clients.forEach((client) => {
-      if (
-        client.readyState === WebSocket.OPEN &&
-        client.roomCode === roomCode
-      ) {
-        client.send(
-          JSON.stringify({ type: "error", error: "room doesn't exist " })
-        );
-      }
-    });
-  }
-
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN && client.roomCode === roomCode) {
-      client.send(JSON.stringify({ type: "room-update", roomData }));
-    }
-  });
-};
 
 setInterval(() => {
   for (const [roomCode, playersMap] of memoryPositions.entries()) {
@@ -121,7 +94,7 @@ setInterval(() => {
     }));
 
     if (players.length === 0) {
-      memoryPositions.delete(roomCode); 
+      memoryPositions.delete(roomCode);
       continue;
     }
 
@@ -139,29 +112,8 @@ setInterval(() => {
       }
     });
   }
-}, 20); 
+}, 20);
 
-// Créer une room
-
-app.get("/api/createRoom", (req, res) => {
-  const { room } = req.query;
-
-  if (!room) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Room code required" });
-  }
-
-  if (!rooms.has(room)) {
-    rooms.set(room, {
-      roomcode: room,
-      status: "pause",
-      countdown: 3,
-    });
-  }
-
-  return res.json({ success: true });
-});
 //Créer un Joueur
 
 app.get("/api/createPlayer", async (req, res) => {
@@ -193,12 +145,12 @@ app.get("/api/createPlayer", async (req, res) => {
 
   memoryPositions.get(room).set(playerId, {
     id: playerId,
-    nom:name,
+    nom: name,
     color,
-    text:"",
+    text: "",
     x: 0,
     y: 0,
-    score:0,
+    score: 0,
   });
 
   return res.json({ success: true, playerId });
@@ -219,20 +171,16 @@ app.get("/api/settext", async (req, res) => {
 
   if (player) {
     player.text = text;
-    
   }
 
   setTimeout(() => {
-      
-        if (player.text === text) {
-          player.text = "";
-        }
-      
-    }, 7000);
+    if (player.text === text) {
+      player.text = "";
+    }
+  }, 7000);
 
-  return res.json({ success: true});
+  return res.json({ success: true });
 });
-
 
 // modifier les positions d'un joueur
 
@@ -248,9 +196,58 @@ const updateJoueurPositions = (playerId, x, y, roomCode) => {
   }
 };
 
+//==============  Rooom ==================
 
+const getRoomData = async (roomCode) => {
+  if (!rooms.has(roomCode)) return null;
+  return { room: rooms.get(roomCode) };
+};
 
-//==============  GAME ==================
+// envoyer les infos à la room
+
+const broadcastRoomToRoom = async (roomCode) => {
+  const roomData = await getRoomData(roomCode);
+
+  wss.clients.forEach((client) => {
+    if (client.readyState !== WebSocket.OPEN || client.roomCode !== roomCode)
+      return;
+
+    if (!roomData) {
+      client.send(
+        JSON.stringify({ type: "error", error: "room doesn't exist" })
+      );
+    } else {
+      client.send(JSON.stringify({ type: "room-update", roomData }));
+    }
+  });
+};
+
+// Créer une room
+
+const createDefaultRoom = (roomCode) => ({
+  roomcode: roomCode,
+  status: "pause",
+  countdown: 3,
+  time: 5,
+  type: "",
+  infos: {},
+});
+
+app.get("/api/createRoom", (req, res) => {
+  const { room } = req.query;
+
+  if (!room) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Room code required" });
+  }
+
+  if (!rooms.has(room)) {
+    rooms.set(room, createDefaultRoom(room));
+  }
+
+  return res.json({ success: true });
+});
 
 //Boucle gameplay
 
@@ -262,20 +259,103 @@ setInterval(() => {
     if (newCountdown < 0 && room.status === "pause") {
       newStatus = "play";
       newCountdown = 5;
+      newGame(roomcode);
     } else if (newCountdown < 0 && room.status === "play") {
+      checkWin(roomcode);
       newStatus = "pause";
       newCountdown = 3;
+      rooms.set(roomcode, {
+        ...room,
+        status: newStatus,
+        countdown: newCountdown,
+      });
+    } else {
+      rooms.set(roomcode, {
+        ...room,
+        status: newStatus,
+        countdown: newCountdown,
+      });
     }
-
-    rooms.set(roomcode, {
-      ...room,
-      status: newStatus,
-      countdown: newCountdown,
-    });
 
     broadcastRoomToRoom(roomcode);
   }
 }, 1000);
+
+// choix du jeu
+
+function newGame(roomcode) {
+  const gamelist = [game1];
+
+  const game = gamelist[Math.floor(Math.random() * gamelist.length)];
+
+  game(roomcode);
+}
+
+const updateRoom = (roomCode, updates = {}) => {
+  const room = rooms.get(roomCode);
+  if (!room) return;
+  rooms.set(roomCode, { ...room, ...updates });
+};
+
+// jeux
+
+function game1(roomcode) {
+
+  let posx = Math.random() * 0.8;
+  let posy = Math.random() * 0.8;
+  let posx2 = posx + Math.random() * (0.2 - 0.1) + 0.1;
+  let posy2 = posy + Math.random() * (0.2 - 0.1) + 0.1;
+
+
+  updateRoom(roomcode, {
+    status: "play",
+    countdown: 5,
+    time: 5,
+    type: "game1",
+    infos: {
+      carre1: {
+        x: posx,
+        y: posy,
+        x2: posx2,
+        y2: posy2,
+      },
+    },
+  });
+}
+
+function game2(roomcode) {
+  console.log("prout2", roomcode);
+}
+
+// attribuer les points
+
+function checkWin(roomCode) {
+  const room = rooms.get(roomCode);
+  const roomPlayers = memoryPositions.get(roomCode);
+
+  if (!room || !roomPlayers) {
+    return;
+  }
+
+  console.log(room, roomPlayers);
+
+  if (room.type == "game1") {
+    roomPlayers.forEach((joueur) => {
+      if (
+        joueur.x > room.infos.carre1.x &&
+        joueur.x < room.infos.carre1.x2
+      ) {
+        if (
+          joueur.y > room.infos.carre1.y &&
+          joueur.y < room.infos.carre1.y2
+        ) {
+          joueur.score =
+            joueur.score + 1;
+        }
+      }
+    });
+  }
+}
 
 app.listen(port, () => {
   console.log(`Backend running on http://localhost:${port}`);

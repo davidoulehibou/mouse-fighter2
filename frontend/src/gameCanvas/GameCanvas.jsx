@@ -42,9 +42,7 @@ const GameCanvas = ({ onReady, title, gameData }) => {
 
   useEffect(() => {
     if (gameData?.countdown === 1) {
-      console.log("prout1");
       setTimeout(() => {
-        console.log("prout2");
         setIsVisible(false);
       }, [1500]);
     }

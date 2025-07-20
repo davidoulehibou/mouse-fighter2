@@ -1,6 +1,5 @@
 const Timer = ({ gameData }) => {
   const progress = gameData.countdown / gameData.time;
-
   return (
     <>
       <svg viewBox="0 0 300 1" className="gameTimer">
