@@ -67,20 +67,6 @@ const CanvasMouses = ({handleMouseMove, positions, pseudo, gameData, playerId })
     }
   }, [windowSize, mousePosition, pseudo]);
 
-  const handleSetX = async (joueur, x, y, room) => {
-    if (pseudo) {
-      try {
-        await fetch(
-          `${
-            import.meta.env.VITE_URL
-          }/api/movexy?joueur=${joueur}&x=${x}&y=${y}&room=${room}`
-        );
-      } catch (err) {
-        console.error("Erreur appel HTTP:", err);
-      }
-    }
-  };
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
@@ -185,26 +171,29 @@ const CanvasMouses = ({handleMouseMove, positions, pseudo, gameData, playerId })
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    positions.map((joueur) => {
-      const { x, y, color,nom, text } = joueur;
+    positions.forEach((joueur) => {
+      const { x, y, color, nom, text } = joueur;
 
-      let posx;
-      let posy;
+      // Skip if nom or color is missing
+      if (!nom || !color) return;
 
-      if (nom != pseudo) {
+      let posx, posy;
+
+      if (nom !== pseudo) {
         posx = x * windowSize.width;
         posy = y * windowSize.height;
       } else if (mousePosition) {
         posx = mousePosition.x;
         posy = mousePosition.y;
       }
-      drawPlayer(ctx, nom.charAt(0).toUpperCase(), posx, posy, color);
 
+      drawPlayer(ctx, nom.charAt(0).toUpperCase(), posx, posy, color);
 
       if (text) {
         drawSpeechBubble(ctx, text, posx, posy - 10, color, nom);
       }
     });
+
   }, [positions, windowSize, mousePosition]);
 
   const gamesMap = {

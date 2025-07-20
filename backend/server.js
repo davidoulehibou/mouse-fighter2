@@ -1,15 +1,13 @@
 const express = require("express");
-const cors = require("cors"); // ✅ importer cors
-const fs = require("fs");
-const path = require("path");
-const dataFile = path.join(__dirname, "data.json");
+const cors = require("cors"); 
 const WebSocket = require("ws");
-const pool = require("./db");
 
 const app = express();
 const port = 3000;
 
 const memoryPositions = new Map();
+
+const rooms = new Map();
 
 app.use(cors());
 const wss = new WebSocket.Server({ port: 8080 });
@@ -39,10 +37,8 @@ wss.on("connection", async (ws, req) => {
 
     if (message.type === "disconnect") {
       const playerId = message.playerId;
-      console.log("Déconnexion du joueur :", playerId);
-      console.log("szdfgzdfgzfrgsdfgsdfgsdfgsdfgsdfg",playerId);
       deconnectPlayer(playerId, roomCode);
-      broadcastToRoom(roomCode);
+      broadcastRoomToRoom(roomCode);
     }
 
     if (message.type === "update-position") {
@@ -61,7 +57,7 @@ wss.on("connection", async (ws, req) => {
     console.log("Déconnexion socket : ", code);
   });
 
-  broadcastToRoom(roomCode);
+  broadcastRoomToRoom(roomCode);
 });
 
 wss.on("close", () => clearInterval(interval));
@@ -69,56 +65,27 @@ wss.on("close", () => clearInterval(interval));
 // supprimer le joueur à la déconnexion
 
 const deconnectPlayer = async (playerId, roomCode) => {
-  const conn = await pool.getConnection();
-  await conn.query("DELETE FROM joueurs WHERE id = ?", [playerId]);
-  const result = await conn.query("SELECT * FROM joueurs WHERE roomcode = ?", [
-    roomCode,
-  ]);
-  if (result.length === 0) {
-    await conn.query("DELETE FROM rooms WHERE roomcode = ?", [roomCode]);
-  }
-  conn.release();
-
-  // 🧼 Nettoyage mémoire
   if (memoryPositions.has(roomCode)) {
-    memoryPositions.get(roomCode).delete(playerId);
-  }
+    const roomPlayers = memoryPositions.get(roomCode);
+    roomPlayers.delete(playerId);
 
-  broadcastToRoom(roomCode);
+    if (roomPlayers.size === 0) {
+      memoryPositions.delete(roomCode);
+    }
+  }
 };
+
 
 // récupérer les infos de la room avant l'envoi
 
 const getRoomData = async (roomCode) => {
-  try {
-    const conn = await pool.getConnection();
-    const result = await conn.query("SELECT * FROM rooms WHERE roomcode = ?", [
-      roomCode,
-    ]);
-    const players = await conn.query(
-      "SELECT * FROM joueurs WHERE roomcode = ?",
-      [roomCode]
-    );
-    conn.release();
-
-    if (result.length === 0) return null;
-
-    return {
-      room: result[0],
-      players: players || [],
-    };
-  } catch (err) {
-    console.error(
-      "Erreur lors de la récupération des données de la room :",
-      err
-    );
-    return null;
-  }
+  if (!rooms.has(roomCode)) return null;
+  return { room: rooms.get(roomCode) };
 };
 
 // envoyer les infos à la room
 
-const broadcastToRoom = async (roomCode) => {
+const broadcastRoomToRoom = async (roomCode) => {
   const roomData = await getRoomData(roomCode);
 
   if (!roomData) {
@@ -147,6 +114,10 @@ setInterval(() => {
       id,
       x: pos.x,
       y: pos.y,
+      nom: pos.nom,
+      color: pos.color,
+      text: pos.text,
+      score: pos.score,
     }));
 
     if (players.length === 0) {
@@ -168,30 +139,33 @@ setInterval(() => {
       }
     });
   }
-}, 33); 
+}, 20); 
 
 // Créer une room
 
-app.get("/api/createRoom", async (req, res) => {
+app.get("/api/createRoom", (req, res) => {
   const { room } = req.query;
 
-  try {
-    const conn = await pool.getConnection();
-    await conn.query("INSERT INTO rooms (roomcode) VALUES (?); ", [room]);
-    conn.release();
-  } catch (err) {
-    console.error(err);
-    return res.json({ success: false });
+  if (!room) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Room code required" });
+  }
+
+  if (!rooms.has(room)) {
+    rooms.set(room, {
+      roomcode: room,
+      status: "pause",
+      countdown: 3,
+    });
   }
 
   return res.json({ success: true });
 });
-
 //Créer un Joueur
 
 app.get("/api/createPlayer", async (req, res) => {
   const { room, name } = req.query;
-  let playerId = 0;
 
   function hslToHex(h, s, l) {
     l /= 100;
@@ -206,84 +180,100 @@ app.get("/api/createPlayer", async (req, res) => {
     return `#${f(0)}${f(8)}${f(4)}`;
   }
 
-  let color = hslToHex(Math.floor(Math.random() * 255), 40, 60);
+  const color = hslToHex(
+    Math.floor(Math.random() * 360),
+    80,
+    Math.floor(Math.random() * 10) + 40
+  );
+  const playerId = `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-  try {
-    console.log(room, name);
-    const conn = await pool.getConnection();
-    const okPacket = await conn.query(
-      "INSERT INTO joueurs (nom, roomcode, color) VALUES (?, ?, ?); ",
-      [name, room, color]
-    );
-    conn.release();
-    playerId = Number(okPacket.insertId);
-  } catch (err) {
-    console.error(err);
-    return res.json({ success: false, playerId: null });
+  if (!memoryPositions.has(room)) {
+    memoryPositions.set(room, new Map());
   }
 
-  return res.json({ success: true, playerId: playerId });
+  memoryPositions.get(room).set(playerId, {
+    id: playerId,
+    nom:name,
+    color,
+    text:"",
+    x: 0,
+    y: 0,
+    score:0,
+  });
+
+  return res.json({ success: true, playerId });
 });
+
+// ecrire un text
+
+app.get("/api/settext", async (req, res) => {
+  const { joueur, text, roomCode } = req.query;
+
+  console.log(joueur, text, roomCode);
+
+  if (!memoryPositions.has(roomCode)) return;
+
+  const roomPlayers = memoryPositions.get(roomCode);
+
+  const player = roomPlayers.get(joueur);
+
+  if (player) {
+    player.text = text;
+    
+  }
+
+  setTimeout(() => {
+      
+        if (player.text === text) {
+          player.text = "";
+        }
+      
+    }, 7000);
+
+  return res.json({ success: true});
+});
+
 
 // modifier les positions d'un joueur
 
 const updateJoueurPositions = (playerId, x, y, roomCode) => {
-  if (!memoryPositions.has(roomCode)) {
-    memoryPositions.set(roomCode, new Map());
-  }
+  if (!memoryPositions.has(roomCode)) return;
 
   const roomPlayers = memoryPositions.get(roomCode);
-  roomPlayers.set(playerId, { x, y });
+  const player = roomPlayers.get(playerId);
+
+  if (player) {
+    player.x = x;
+    player.y = y;
+  }
 };
 
-setInterval(async () => {
-  const conn = await pool.getConnection();
-  for (const [roomCode, playersMap] of memoryPositions.entries()) {
-    for (const [playerId, { x, y }] of playersMap.entries()) {
-      await conn.query("UPDATE joueurs SET x = ?, y = ? WHERE id = ?", [
-        x,
-        y,
-        playerId,
-      ]);
-    }
-  }
-  conn.release();
-}, 10000);
+
 
 //==============  GAME ==================
 
 //Boucle gameplay
 
-setInterval(async () => {
-  const conn = await pool.getConnection();
-  const result = await conn.query(
-    "SELECT roomcode,status, countdown FROM rooms "
-  );
-  conn.release();
+setInterval(() => {
+  for (const [roomcode, room] of rooms.entries()) {
+    let newCountdown = room.countdown - 1;
+    let newStatus = room.status;
 
-  if (result.length > 0) {
-    result.map(async (room) => {
-      let newCountdown = room.countdown - 1;
-      let newStatus = room.status;
-      if (newCountdown < 0 && room.status == "pause") {
-        newStatus = "play";
-        newCountdown = 5;
-      } else if (newCountdown < 0 && room.status == "play") {
-        newStatus = "pause";
-        newCountdown = 3;
-      }
-      try {
-        const conn = await pool.getConnection();
-        await conn.query(
-          "UPDATE rooms SET status = ?, countdown = ? WHERE roomcode = ?",
-          [newStatus, newCountdown, room.roomcode]
-        );
-        conn.release();
-      } catch (err) {
-        console.error(err);
-      }
-      broadcastToRoom(room.roomcode);
+    if (newCountdown < 0 && room.status === "pause") {
+      newStatus = "play";
+      newCountdown = 5;
+    } else if (newCountdown < 0 && room.status === "play") {
+      newStatus = "pause";
+      newCountdown = 3;
+    }
+
+    rooms.set(roomcode, {
+      ...room,
+      status: newStatus,
+      countdown: newCountdown,
     });
+
+    broadcastRoomToRoom(roomcode);
   }
 }, 1000);
 

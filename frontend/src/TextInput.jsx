@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const TextInput = ({ joueur }) => {
+const TextInput = ({ joueur, roomCode }) => {
   const [text, setText] = useState("");
   const inputRef = useRef(null);
 
@@ -28,7 +28,7 @@ const TextInput = ({ joueur }) => {
             import.meta.env.VITE_URL
           }/api/settext?joueur=${joueur}&text=${encodeURIComponent(
             currentText
-          )}`
+          )}&roomCode=${roomCode}`
         );
       } catch (err) {
         console.error("Erreur appel HTTP:", err);
@@ -46,7 +46,7 @@ const TextInput = ({ joueur }) => {
       ref={inputRef}
       type="text"
       value={text}
-      placeholder={joueur}
+      placeholder="Envoyer un message"
       onKeyDown={handleKeyDown}
       onChange={handleText}
     />

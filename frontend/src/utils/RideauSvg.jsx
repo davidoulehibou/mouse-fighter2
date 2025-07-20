@@ -30,7 +30,7 @@ const RideauSvg = ({ color, dataGame }) => {
             opacity: "0.25",
           }}
         >
-          <g clip-path="url(#clip0_133_2)">
+          <g clipPath="url(#clip0_133_2)">
             <path
               d="M513.413 -207.251L1023 1023L705.817 -286.948L513.413 -207.251Z"
               fill={color}
@@ -104,9 +104,9 @@ const RideauSvg = ({ color, dataGame }) => {
               width="10000"
               height="10000"
               filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
+              colorinterpolation-filters="sRGB"
             >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
+              <feFlood floodOpacity="0" result="BackgroundImageFix" />
               <feBlend
                 mode="normal"
                 in="SourceGraphic"

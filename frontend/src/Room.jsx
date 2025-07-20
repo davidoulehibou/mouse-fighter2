@@ -4,6 +4,8 @@ import Connect from "./Connect";
 import { useRef } from "react";
 import CanvasMouses from "./CanvasMouses";
 import Timer from "./utils/Timer";
+import PlayerList from "./PlayerList";
+import TextInput from "./TextInput";
 
 const Room = ({ handleError }) => {
   const { param } = useParams();
@@ -30,18 +32,11 @@ const Room = ({ handleError }) => {
         const roomData = message.roomData;
 
         setRoom(roomData.room);
-        setPlayers(roomData.players);
+
       } else if (message.type === "players-positions") {
-        console.log("ca change")
-        setPlayers((prevPlayers) =>
-          prevPlayers.map((player) => {
-            const updated = message.players.find((p) => p.id === player.id);
-            if (updated) {
-              return { ...player, x: updated.x, y: updated.y };
-            }
-            return player;
-          })
-        );
+
+        setPlayers(message.players)
+
       } else if (message.type === "error") {
         handleError(message.error);
         navigate("/");
@@ -123,14 +118,10 @@ const Room = ({ handleError }) => {
         positions={players}
         handleMouseMove={handleMouseMove}
       />
+      <PlayerList positions={players} pseudo={pseudo} />
       <Timer gameData={room} />
-      <ul>
-        {pseudo && <li>{pseudo}</li>}
-        <li>Room : {room.roomcode || "sans nom"} </li>
-        <li>status: {room.status}</li>
-        <li>countdown : {room.countdown}</li>
-        {!playerId && <Connect handlePseudo={handlePseudo} error={error} />}
-      </ul>
+      {!playerId && <Connect handlePseudo={handlePseudo} error={error} />}
+      {playerId && <TextInput joueur={playerId} roomCode={param} />}
     </>
   );
 };
