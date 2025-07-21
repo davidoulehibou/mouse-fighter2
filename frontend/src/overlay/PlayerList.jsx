@@ -1,4 +1,4 @@
-import getTextColor, { getInsideColor } from "./utils/getTextColor";
+import getTextColor, { getInsideColor } from "../utils/getTextColor";
 
 function PlayerList({ positions, pseudo }) {
   

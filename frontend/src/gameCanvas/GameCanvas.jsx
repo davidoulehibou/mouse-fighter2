@@ -1,6 +1,6 @@
 // GameCanvas.jsx
 import { useRef, useEffect, useState } from "react";
-import Timer from "../utils/Timer";
+import Timer from "../overlay/Timer";
 
 const GameCanvas = ({ onReady, title, gameData }) => {
   const canvasRef = useRef(null);

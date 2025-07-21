@@ -1,17 +1,24 @@
 import { useEffect, useRef, useState } from "react";
-import TextInput from "./TextInput";
+import TextInput from "./overlay/TextInput";
 import getTextColor, { getInsideColor } from "./utils/getTextColor";
-import RideauSvg from "./utils/RideauSvg";
+import RideauSvg from "./overlay/RideauSvg";
 import Game1 from "./gameCanvas/Game1";
 import Game2 from "./gameCanvas/Game2";
 
-const CanvasMouses = ({handleMouseMove, positions, pseudo, gameData, playerId }) => {
+const CanvasMouses = ({
+  handleMouseMove,
+  positions,
+  pseudo,
+  gameData,
+  playerId,
+  setDead
+}) => {
   const gameStatus = gameData.status;
   const canvasRef = useRef(null);
 
   const [numJoueur, setNumJoueur] = useState(null);
 
-  const [joueurData, setJoueurData] = useState(null)
+  const [joueurData, setJoueurData] = useState(null);
 
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -50,13 +57,12 @@ const CanvasMouses = ({handleMouseMove, positions, pseudo, gameData, playerId })
   }, []);
 
   useEffect(() => {
-    
-    if(playerId){
+    if (playerId) {
       positions.map((joueur) => {
-        if(joueur.id == playerId){
-          setJoueurData(joueur)
+        if (joueur.id == playerId) {
+          setJoueurData(joueur);
         }
-      })
+      });
     }
 
     if (playerId) {
@@ -172,7 +178,7 @@ const CanvasMouses = ({handleMouseMove, positions, pseudo, gameData, playerId })
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     positions.forEach((joueur) => {
-      const { x, y, color, nom, text } = joueur;
+      const { x, y, color, nom, text, dead } = joueur;
 
       // Skip if nom or color is missing
       if (!nom || !color) return;
@@ -187,18 +193,23 @@ const CanvasMouses = ({handleMouseMove, positions, pseudo, gameData, playerId })
         posy = mousePosition.y;
       }
 
-      drawPlayer(ctx, nom.charAt(0).toUpperCase(), posx, posy, color);
+      let mouseColor = color
+
+      if(dead){
+        mouseColor = "#505050"
+      }
+
+      drawPlayer(ctx, nom.charAt(0).toUpperCase(), posx, posy, mouseColor);
 
       if (text) {
         drawSpeechBubble(ctx, text, posx, posy - 10, color, nom);
       }
     });
-
   }, [positions, windowSize, mousePosition]);
 
   const gamesMap = {
-    game1: <Game1 gameData={gameData ? gameData : null} />,
-    game2: <Game2 gameData={gameData ? gameData : null} />,
+    game1: <Game1 gameData={gameData ? gameData : null} setDead={setDead} />,
+    game2: <Game2 gameData={gameData ? gameData : null} setDead={setDead} />,
   };
 
   return (
@@ -207,8 +218,6 @@ const CanvasMouses = ({handleMouseMove, positions, pseudo, gameData, playerId })
         color={joueurData ? joueurData.color : "grey"}
         dataGame={gameStatus}
       />
-
-
 
       {gameStatus == "play" && gamesMap[gameData.type]}
 

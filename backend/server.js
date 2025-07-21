@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const WebSocket = require("ws");
 
+const game1 = require("./game1");
+
 const app = express();
 const port = 3000;
 
@@ -51,6 +53,14 @@ wss.on("connection", async (ws, req) => {
         message.room
       );
     }
+
+    if (message.type === "update-dead") {
+      updateJoueurDead(
+        message.playerId,
+        message.dead,
+        message.room
+      );
+    }
   });
 
   ws.on("pong", () => (ws.isAlive = true));
@@ -83,15 +93,7 @@ const deconnectPlayer = async (playerId, roomCode) => {
 
 setInterval(() => {
   for (const [roomCode, playersMap] of memoryPositions.entries()) {
-    const players = Array.from(playersMap.entries()).map(([id, pos]) => ({
-      id,
-      x: pos.x,
-      y: pos.y,
-      nom: pos.nom,
-      color: pos.color,
-      text: pos.text,
-      score: pos.score,
-    }));
+    const players = Array.from(playersMap.entries()).map(([id, pos]) => pos);
 
     if (players.length === 0) {
       memoryPositions.delete(roomCode);
@@ -151,6 +153,7 @@ app.get("/api/createPlayer", async (req, res) => {
     x: 0,
     y: 0,
     score: 0,
+    dead: false,
   });
 
   return res.json({ success: true, playerId });
@@ -193,6 +196,19 @@ const updateJoueurPositions = (playerId, x, y, roomCode) => {
   if (player) {
     player.x = x;
     player.y = y;
+  }
+};
+
+// changer la valeur dead d'un joueur
+
+const updateJoueurDead = (playerId, dead, roomCode) => {
+  if (!memoryPositions.has(roomCode)) return;
+
+  const roomPlayers = memoryPositions.get(roomCode);
+  const player = roomPlayers.get(playerId);
+
+  if (player) {
+    player.dead = dead;
   }
 };
 
@@ -285,10 +301,9 @@ setInterval(() => {
 
 function newGame(roomcode) {
   const gamelist = [game1];
-
   const game = gamelist[Math.floor(Math.random() * gamelist.length)];
 
-  game(roomcode);
+  game(roomcode, updateRoom); // ici on passe updateRoom
 }
 
 const updateRoom = (roomCode, updates = {}) => {
@@ -299,34 +314,6 @@ const updateRoom = (roomCode, updates = {}) => {
 
 // jeux
 
-function game1(roomcode) {
-
-  let posx = Math.random() * 0.8;
-  let posy = Math.random() * 0.8;
-  let posx2 = posx + Math.random() * (0.2 - 0.1) + 0.1;
-  let posy2 = posy + Math.random() * (0.2 - 0.1) + 0.1;
-
-
-  updateRoom(roomcode, {
-    status: "play",
-    countdown: 5,
-    time: 5,
-    type: "game1",
-    infos: {
-      carre1: {
-        x: posx,
-        y: posy,
-        x2: posx2,
-        y2: posy2,
-      },
-    },
-  });
-}
-
-function game2(roomcode) {
-  console.log("prout2", roomcode);
-}
-
 // attribuer les points
 
 function checkWin(roomCode) {
@@ -336,25 +323,12 @@ function checkWin(roomCode) {
   if (!room || !roomPlayers) {
     return;
   }
+  roomPlayers.forEach((joueur) => {
+    if (!joueur.dead ) {
 
-  console.log(room, roomPlayers);
-
-  if (room.type == "game1") {
-    roomPlayers.forEach((joueur) => {
-      if (
-        joueur.x > room.infos.carre1.x &&
-        joueur.x < room.infos.carre1.x2
-      ) {
-        if (
-          joueur.y > room.infos.carre1.y &&
-          joueur.y < room.infos.carre1.y2
-        ) {
-          joueur.score =
-            joueur.score + 1;
-        }
-      }
-    });
-  }
+        joueur.score ++;
+    }
+  });
 }
 
 app.listen(port, () => {

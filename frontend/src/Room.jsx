@@ -1,11 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import Connect from "./Connect";
+import Connect from "./forms/Connect";
 import { useRef } from "react";
 import CanvasMouses from "./CanvasMouses";
-import Timer from "./utils/Timer";
-import PlayerList from "./PlayerList";
-import TextInput from "./TextInput";
+import PlayerList from "./overlay/PlayerList";
+import TextInput from "./overlay/TextInput";
 
 const Room = ({ handleError }) => {
   const { param } = useParams();
@@ -34,11 +33,8 @@ const Room = ({ handleError }) => {
         const roomData = message.roomData;
 
         setRoom(roomData.room);
-
       } else if (message.type === "players-positions") {
-
-        setPlayers(message.players)
-
+        setPlayers(message.players);
       } else if (message.type === "error") {
         handleError(message.error);
         navigate("/");
@@ -86,6 +82,19 @@ const Room = ({ handleError }) => {
     }
   };
 
+  const setDead = (bool) => {
+    if (ws.current?.readyState === WebSocket.OPEN && playerId) {
+      ws.current.send(
+        JSON.stringify({
+          type: "update-dead",
+          playerId,
+          dead:bool,
+          room: param,
+        })
+      );
+    }
+  }
+
   const handlePseudo = async (pseudo) => {
     try {
       const response = await fetch(
@@ -119,9 +128,9 @@ const Room = ({ handleError }) => {
         playerId={playerId}
         positions={players}
         handleMouseMove={handleMouseMove}
+        setDead={setDead}
       />
       <PlayerList positions={players} pseudo={pseudo} />
-      <Timer gameData={room} />
       {!playerId && <Connect handlePseudo={handlePseudo} error={error} />}
       {playerId && <TextInput joueur={playerId} roomCode={param} />}
     </>

@@ -2,7 +2,7 @@
 import { useCallback, useState, useEffect } from "react";
 import GameCanvas from "./GameCanvas";
 
-const Game1 = ({ gameData }) => {
+const Game1 = ({ gameData, setDead }) => {
   const [mousePosition, setMousePosition] = useState({
     x: 0,
     y: 0,
@@ -98,6 +98,9 @@ const Game1 = ({ gameData }) => {
         mousePosition.y < infos.carre1.y2 * windowSize.height
       ) {
         color = "#07ff8b50";
+        setDead(false)
+      }else{
+        setDead(true)
       }
 
       ctx.fillStyle = color;

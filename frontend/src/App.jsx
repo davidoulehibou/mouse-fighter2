@@ -1,7 +1,7 @@
 // App.jsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
-import RoomInput from "./RoomInput";
+import RoomInput from "./forms/RoomInput";
 import Room from "./Room";
 import { useState } from "react";
 
