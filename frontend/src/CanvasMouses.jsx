@@ -208,8 +208,8 @@ const CanvasMouses = ({
   }, [positions, windowSize, mousePosition]);
 
   const gamesMap = {
-    game1: <Game1 gameData={gameData ? gameData : null} setDead={setDead} />,
-    game2: <Game2 gameData={gameData ? gameData : null} setDead={setDead} />,
+    game1: <Game1 gameData={gameData ? gameData : null} setDead={setDead} mousePosition={mousePosition}/>,
+    game2: <Game2 gameData={gameData ? gameData : null} setDead={setDead} mousePosition={mousePosition}/>,
   };
 
   return (

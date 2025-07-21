@@ -2,7 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const WebSocket = require("ws");
 
-const game1 = require("./game1");
+const game1 = require("./games/game1");
+const game2 = require("./games/game2");
 
 const app = express();
 const port = 3000;
@@ -81,10 +82,10 @@ const deconnectPlayer = async (playerId, roomCode) => {
     const roomPlayers = memoryPositions.get(roomCode);
     roomPlayers.delete(playerId);
 
-    // Supprimer l'entrée si plus aucun joueur
+    
     if (roomPlayers.size === 0) {
       memoryPositions.delete(roomCode);
-      rooms.delete(roomCode); // Suppression de la room
+      rooms.delete(roomCode); 
     }
   }
 };
@@ -300,10 +301,10 @@ setInterval(() => {
 // choix du jeu
 
 function newGame(roomcode) {
-  const gamelist = [game1];
+  const gamelist = [game1, game2];
   const game = gamelist[Math.floor(Math.random() * gamelist.length)];
 
-  game(roomcode, updateRoom); // ici on passe updateRoom
+  game(roomcode, updateRoom);
 }
 
 const updateRoom = (roomCode, updates = {}) => {
@@ -328,6 +329,11 @@ function checkWin(roomCode) {
 
         joueur.score ++;
     }
+    updateJoueurDead(
+        joueur.id,
+        false,
+        roomCode
+      );
   });
 }
 

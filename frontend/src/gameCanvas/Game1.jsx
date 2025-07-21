@@ -1,29 +1,9 @@
 // Game1.jsx
-import { useCallback, useState, useEffect } from "react";
+import { useCallback } from "react";
 import GameCanvas from "./GameCanvas";
 
-const Game1 = ({ gameData, setDead }) => {
-  const [mousePosition, setMousePosition] = useState({
-    x: 0,
-    y: 0,
-  });
-
-  const infos = gameData.infos
-
-  useEffect(() => {
-    // Mettre à jour la position de la souris
-    const handleMouseMove = (event) => {
-      setMousePosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, []);
+const Game1 = ({ gameData, setDead, mousePosition }) => {
+  const infos = gameData.infos;
 
   const handleCanvasReady = useCallback(
     (canvas, windowSize) => {
@@ -84,7 +64,7 @@ const Game1 = ({ gameData, setDead }) => {
         infos.carre1.x * windowSize.width,
         infos.carre1.y * windowSize.height,
         infos.carre1.x * windowSize.width + radius,
-        infos.carre1.y * windowSize.height 
+        infos.carre1.y * windowSize.height
       );
 
       ctx.closePath();
@@ -98,9 +78,9 @@ const Game1 = ({ gameData, setDead }) => {
         mousePosition.y < infos.carre1.y2 * windowSize.height
       ) {
         color = "#07ff8b50";
-        setDead(false)
-      }else{
-        setDead(true)
+        setDead(false);
+      } else {
+        setDead(true);
       }
 
       ctx.fillStyle = color;
@@ -110,7 +90,11 @@ const Game1 = ({ gameData, setDead }) => {
   );
 
   return (
-    <GameCanvas onReady={handleCanvasReady} title="Restez dans le cadre !" gameData={gameData} />
+    <GameCanvas
+      onReady={handleCanvasReady}
+      title="Restez dans le cadre !"
+      gameData={gameData}
+    />
   );
 };
 

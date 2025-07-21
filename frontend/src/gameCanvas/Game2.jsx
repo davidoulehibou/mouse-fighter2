@@ -1,5 +1,5 @@
 // Game1.jsx
-import { useCallback, useState, useEffect } from "react";
+import { useCallback,} from "react";
 import GameCanvas from "./GameCanvas";
 
 const Game2 = ({ gameData }) => {
@@ -7,7 +7,7 @@ const Game2 = ({ gameData }) => {
     const ctx = canvas.getContext("2d");
     ctx.font = "100px Dongle";
     ctx.textAlign = "center";
-    ctx.fillText(gameData.gameCanvas.infos.mot, windowSize.width / 2, 110);
+    ctx.fillText(gameData.infos.mot, windowSize.width / 2, 110);
   }, []);
 
   return (

@@ -20,6 +20,4 @@ function game1(roomcode, updateRoom) {
   });
 }
 
-
-
 module.exports = game1;
