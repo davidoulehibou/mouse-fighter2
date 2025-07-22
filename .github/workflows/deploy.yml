@@ -35,6 +35,7 @@ jobs:
           mkdir -p deploy/backend
           cp -r frontend/dist deploy/frontend/
           cp backend/server.js deploy/backend/
+          cp -r backend/games deploy/backend/
 
       - name: Stop PM2 server before deployment
         uses: appleboy/ssh-action@v0.1.10
