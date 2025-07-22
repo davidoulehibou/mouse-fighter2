@@ -35,7 +35,6 @@ jobs:
           mkdir -p deploy/backend
           cp -r frontend/dist deploy/frontend/
           cp backend/server.js deploy/backend/
-          cp backend/data.json deploy/backend/
 
       - name: Stop PM2 server before deployment
         uses: appleboy/ssh-action@v0.1.10
@@ -81,16 +80,6 @@ jobs:
           target: "/var/www/mf2/backend/"
           strip_components: 2
 
-      - name: Deploy data.json (backend only)
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.VPS_HOST_DEVHIBOU }}
-          username: ${{ secrets.VPS_USER_DEVHIBOU }}
-          key: ${{ secrets.VPS_SSH_KEY_DEVHIBOU }}
-          port: 22
-          source: "deploy/backend/data.json"
-          target: "/var/www/mf2/backend/"
-          strip_components: 2
 
       - name: Restart PM2 server after deployment
         uses: appleboy/ssh-action@v0.1.10
