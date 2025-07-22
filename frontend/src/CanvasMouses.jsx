@@ -11,7 +11,7 @@ const CanvasMouses = ({
   pseudo,
   gameData,
   playerId,
-  setDead
+  setDead,
 }) => {
   const gameStatus = gameData.status;
   const canvasRef = useRef(null);
@@ -30,6 +30,7 @@ const CanvasMouses = ({
     y: 0,
   });
 
+
   useEffect(() => {
     // Mettre à jour la taille de la fenêtre
     const handleResize = () => {
@@ -46,6 +47,7 @@ const CanvasMouses = ({
         y: event.clientY,
       });
     };
+    
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("mousemove", handleMouseMove);
@@ -71,7 +73,8 @@ const CanvasMouses = ({
         mousePosition.y / windowSize.height
       );
     }
-  }, [windowSize, mousePosition, pseudo]);
+  }, [windowSize, mousePosition, playerId]);
+
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -139,8 +142,13 @@ const CanvasMouses = ({
     );
   }
 
-  function drawPlayer(ctx, letter, x, y, color) {
+  function drawPlayer(ctx, letter, x, y, color, dead) {
     ctx.beginPath();
+    ctx.globalAlpha = 1;
+    if (dead) {
+      ctx.globalAlpha = 0.2;
+    }
+
     ctx.moveTo(x, y);
     ctx.lineTo(x, y + 18);
     ctx.lineTo(x + 7, y + 13);
@@ -193,13 +201,7 @@ const CanvasMouses = ({
         posy = mousePosition.y;
       }
 
-      let mouseColor = color
-
-      if(dead){
-        mouseColor = "#505050"
-      }
-
-      drawPlayer(ctx, nom.charAt(0).toUpperCase(), posx, posy, mouseColor);
+      drawPlayer(ctx, nom.charAt(0).toUpperCase(), posx, posy, color, dead);
 
       if (text) {
         drawSpeechBubble(ctx, text, posx, posy - 10, color, nom);
@@ -207,9 +209,17 @@ const CanvasMouses = ({
     });
   }, [positions, windowSize, mousePosition]);
 
+  const gameInfos = {
+    gameData: gameData ? gameData : null,
+    setDead: setDead,
+    mousePosition: mousePosition,
+    playerId: playerId,
+    positions: positions,
+  };
+
   const gamesMap = {
-    game1: <Game1 gameData={gameData ? gameData : null} setDead={setDead} mousePosition={mousePosition}/>,
-    game2: <Game2 gameData={gameData ? gameData : null} setDead={setDead} mousePosition={mousePosition}/>,
+    game1: <Game1 gameInfos={gameInfos} />,
+    game2: <Game2 gameInfos={gameInfos} />,
   };
 
   return (

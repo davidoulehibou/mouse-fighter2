@@ -1,9 +1,12 @@
 // Game1.jsx
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import GameCanvas from "./GameCanvas";
 
-const Game1 = ({ gameData, setDead, mousePosition }) => {
+const Game1 = ({ gameInfos }) => {
+  const { gameData, setDead, mousePosition, playerId, positions } = gameInfos;
   const infos = gameData.infos;
+
+
 
   const handleCanvasReady = useCallback(
     (canvas, windowSize) => {

@@ -54,13 +54,8 @@ wss.on("connection", async (ws, req) => {
         message.room
       );
     }
-
     if (message.type === "update-dead") {
-      updateJoueurDead(
-        message.playerId,
-        message.dead,
-        message.room
-      );
+      updateJoueurDead(message.playerId, message.dead, message.room);
     }
   });
 
@@ -82,10 +77,9 @@ const deconnectPlayer = async (playerId, roomCode) => {
     const roomPlayers = memoryPositions.get(roomCode);
     roomPlayers.delete(playerId);
 
-    
     if (roomPlayers.size === 0) {
       memoryPositions.delete(roomCode);
-      rooms.delete(roomCode); 
+      rooms.delete(roomCode);
     }
   }
 };
@@ -304,7 +298,7 @@ function newGame(roomcode) {
   const gamelist = [game1, game2];
   const game = gamelist[Math.floor(Math.random() * gamelist.length)];
 
-  game(roomcode, updateRoom);
+  game(roomcode, updateRoom, setAllDead);
 }
 
 const updateRoom = (roomCode, updates = {}) => {
@@ -312,6 +306,13 @@ const updateRoom = (roomCode, updates = {}) => {
   if (!room) return;
   rooms.set(roomCode, { ...room, ...updates });
 };
+
+function setAllDead(roomCode) {
+  const roomPlayers = memoryPositions.get(roomCode);
+  roomPlayers.forEach((joueur) => {
+    joueur.dead = true;
+  });
+}
 
 // jeux
 
@@ -325,15 +326,10 @@ function checkWin(roomCode) {
     return;
   }
   roomPlayers.forEach((joueur) => {
-    if (!joueur.dead ) {
-
-        joueur.score ++;
+    if (!joueur.dead) {
+      joueur.score++;
     }
-    updateJoueurDead(
-        joueur.id,
-        false,
-        roomCode
-      );
+    updateJoueurDead(joueur.id, false, roomCode);
   });
 }
 

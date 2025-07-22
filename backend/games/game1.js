@@ -1,4 +1,4 @@
-function game1(roomcode, updateRoom) {
+function game1(roomcode, updateRoom, setAllDead) {
   let posx = Math.random() * 0.8;
   let posy = Math.random() * 0.8;
   let posx2 = posx + Math.random() * (0.2 - 0.1) + 0.1;

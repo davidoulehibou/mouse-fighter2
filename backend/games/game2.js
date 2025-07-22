@@ -1,4 +1,4 @@
-function game2(roomcode, updateRoom) {
+function game2(roomcode, updateRoom, setAllDead) {
   let words = [
       "caca",
       "prout",
@@ -68,6 +68,8 @@ function game2(roomcode, updateRoom) {
       "rude",
       "gentil",
     ];
+
+    setAllDead(roomcode)
 
   updateRoom(roomcode, {
     status: "play",
