@@ -80,6 +80,16 @@ jobs:
           target: "/var/www/mf2/backend/"
           strip_components: 2
 
+      - name: Deploy games (backend only)
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST_DEVHIBOU }}
+          username: ${{ secrets.VPS_USER_DEVHIBOU }}
+          key: ${{ secrets.VPS_SSH_KEY_DEVHIBOU }}
+          port: 22
+          source: "deploy/backend/games"
+          target: "/var/www/mf2/backend/games"
+          strip_components: 2
 
       - name: Restart PM2 server after deployment
         uses: appleboy/ssh-action@v0.1.10
