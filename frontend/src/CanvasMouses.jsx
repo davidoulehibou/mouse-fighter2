@@ -164,7 +164,7 @@ const CanvasMouses = ({
     );
   }
 
-  function drawPlayer(ctx, letter, x, y, color, dead) {
+  function drawPlayer(ctx, letter, x, y, color, dead, click) {
     ctx.beginPath();
     ctx.globalAlpha = 1;
     if (dead) {
@@ -179,6 +179,11 @@ const CanvasMouses = ({
     ctx.closePath();
     ctx.fillStyle = getInsideColor(color);
     ctx.strokeStyle = color;
+
+    if(click){
+      ctx.strokeStyle = "white";
+      
+    }
 
     ctx.lineWidth = 3;
     ctx.lineJoin = "round";
@@ -208,28 +213,32 @@ const CanvasMouses = ({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     positions.forEach((joueur) => {
-      const { x, y, color, nom, text, dead } = joueur;
+      const { x, y, color, nom, text, dead, click } = joueur;
 
       // Skip if nom or color is missing
       if (!nom || !color) return;
 
       let posx, posy;
+      let clickStatus = false
 
       if (nom !== pseudo) {
         posx = x * windowSize.width;
         posy = y * windowSize.height;
+        clickStatus = click
+        
       } else if (mousePosition) {
         posx = mousePosition.x;
         posy = mousePosition.y;
+        clickStatus = isMouseDownRef.current
       }
 
-      drawPlayer(ctx, nom.charAt(0).toUpperCase(), posx, posy, color, dead);
+      drawPlayer(ctx, nom.charAt(0).toUpperCase(), posx, posy, color, dead, clickStatus);
 
       if (text) {
         drawSpeechBubble(ctx, text, posx, posy - 10, color, nom);
       }
     });
-  }, [positions, windowSize, mousePosition]);
+  }, [positions, windowSize, mousePosition , isMouseDownRef]);
 
   const gameInfos = {
     gameData: gameData ? gameData : null,
