@@ -51,11 +51,16 @@ wss.on("connection", async (ws, req) => {
         message.playerId,
         message.x,
         message.y,
+        message.click,
         message.room
       );
     }
     if (message.type === "update-dead") {
       updateJoueurDead(message.playerId, message.dead, message.room);
+    }
+
+    if (message.type === "update-click") {
+      updateJoueurClick(message.playerId, message.click, message.room);
     }
   });
 
@@ -149,6 +154,7 @@ app.get("/api/createPlayer", async (req, res) => {
     y: 0,
     score: 0,
     dead: false,
+    click: false,
   });
 
   return res.json({ success: true, playerId });
@@ -182,7 +188,7 @@ app.get("/api/settext", async (req, res) => {
 
 // modifier les positions d'un joueur
 
-const updateJoueurPositions = (playerId, x, y, roomCode) => {
+const updateJoueurPositions = (playerId, x, y, click, roomCode) => {
   if (!memoryPositions.has(roomCode)) return;
 
   const roomPlayers = memoryPositions.get(roomCode);
@@ -191,6 +197,7 @@ const updateJoueurPositions = (playerId, x, y, roomCode) => {
   if (player) {
     player.x = x;
     player.y = y;
+    player.click = click;
   }
 };
 
@@ -206,6 +213,7 @@ const updateJoueurDead = (playerId, dead, roomCode) => {
     player.dead = dead;
   }
 };
+
 
 //==============  Rooom ==================
 

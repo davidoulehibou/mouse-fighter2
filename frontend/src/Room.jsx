@@ -68,7 +68,7 @@ const Room = ({ handleError }) => {
     };
   }, [param, playerId]);
 
-  const handleMouseMove = (x, y) => {
+  const handleMouseMove = (x, y, click) => {
     if (ws.current?.readyState === WebSocket.OPEN && playerId) {
       ws.current.send(
         JSON.stringify({
@@ -76,6 +76,7 @@ const Room = ({ handleError }) => {
           playerId,
           x,
           y,
+          click,
           room: param,
         })
       );

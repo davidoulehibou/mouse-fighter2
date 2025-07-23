@@ -28,8 +28,10 @@ const CanvasMouses = ({
   const [mousePosition, setMousePosition] = useState({
     x: 0,
     y: 0,
+    click: false,
   });
 
+  const isMouseDownRef = useRef(false);
 
   useEffect(() => {
     // Mettre à jour la taille de la fenêtre
@@ -40,21 +42,44 @@ const CanvasMouses = ({
       });
     };
 
-    // Mettre à jour la position de la souris
     const handleMouseMove = (event) => {
       setMousePosition({
         x: event.clientX,
         y: event.clientY,
+        click: isMouseDownRef.current,
       });
     };
-    
+
+    const handleMouseDown = (e) => {
+      isMouseDownRef.current = true;
+      setMousePosition((prev) => ({
+        ...prev,
+        x: e.clientX,
+        y: e.clientY,
+        click: true,
+      }));
+    };
+
+    const handleMouseUp = (e) => {
+      isMouseDownRef.current = false;
+      setMousePosition((prev) => ({
+        ...prev,
+        x: e.clientX,
+        y: e.clientY,
+        click: false,
+      }));
+    };
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
     };
   }, []);
 
@@ -65,16 +90,13 @@ const CanvasMouses = ({
           setJoueurData(joueur);
         }
       });
-    }
-
-    if (playerId) {
       handleMouseMove(
         mousePosition.x / windowSize.width,
-        mousePosition.y / windowSize.height
+        mousePosition.y / windowSize.height,
+        mousePosition.click
       );
     }
   }, [windowSize, mousePosition, playerId]);
-
 
   useEffect(() => {
     const canvas = canvasRef.current;
