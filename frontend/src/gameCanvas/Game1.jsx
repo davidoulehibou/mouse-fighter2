@@ -1,12 +1,26 @@
 // Game1.jsx
 import { useCallback, useEffect } from "react";
 import GameCanvas from "./GameCanvas";
+import { useState } from "react";
 
 const Game1 = ({ gameInfos }) => {
-  const { gameData, setDead, mousePosition, playerId, positions } = gameInfos;
+  const {
+    gameData,
+    setDead,
+    mousePosition,
+    playerId,
+    positions,
+  } = gameInfos;
   const infos = gameData.infos;
 
+  const [playersClicks, setPlayersClicks] = useState([]);
 
+  useEffect(() => {
+    let tempPlayersClicks = positions
+      .filter((player) => player.click)
+      .map((player) => ({ id: player.id, x: player.x, y: player.y }));
+    setPlayersClicks(tempPlayersClicks);
+  }, [positions]);
 
   const handleCanvasReady = useCallback(
     (canvas, windowSize) => {
@@ -89,7 +103,7 @@ const Game1 = ({ gameInfos }) => {
       ctx.fillStyle = color;
       ctx.fill();
     },
-    [infos, mousePosition]
+    [infos, mousePosition, playersClicks]
   );
 
   return (
