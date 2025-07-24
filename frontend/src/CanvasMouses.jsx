@@ -85,6 +85,7 @@ const CanvasMouses = ({
   }, []);
 
   useEffect(() => {
+    
     if (playerId) {
       positions.map((joueur) => {
         if (joueur.id == playerId) {
@@ -97,7 +98,7 @@ const CanvasMouses = ({
         mousePosition.click
       );
     }
-  }, [windowSize, mousePosition, playerId]);
+  }, [windowSize, mousePosition, playerId, gameData]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
