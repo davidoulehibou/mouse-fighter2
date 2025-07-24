@@ -139,7 +139,6 @@ const Cadre1 = ({ gameInfos }) => {
         setInfos(newInfos);
       } else {
         let vitesse = playersClicks.length/playersInfos.length
-        console.log(vitesse)
         let newInfos = {
           ...infos,
           carre1: {

@@ -3,14 +3,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import GameCanvas from "./GameCanvas";
 
 const Text1 = ({ gameInfos }) => {
-  const { gameData, setDead, mousePosition, playerId, playersInfos } = gameInfos;
+  const { gameData, setDead, mousePosition, playerId, playersInfos } =
+    gameInfos;
   const playerInfos = playersInfos.find((obj) => obj.id === playerId);
-  
+
   useEffect(() => {
-    if (playerInfos.text.includes(gameData.infos.mot) ) {
-      setDead(false);
+    if (playerInfos) {
+      if (playerInfos.text.includes(gameData.infos.mot)) {
+        setDead(false);
+      }
     }
-  }, [playerInfos.text]);
+  }, [playerInfos]);
 
   const handleCanvasReady = useCallback((canvas, windowSize) => {
     const ctx = canvas.getContext("2d");

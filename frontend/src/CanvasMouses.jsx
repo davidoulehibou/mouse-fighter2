@@ -263,12 +263,11 @@ const CanvasMouses = ({
 
   return (
     <>
+      {gameStatus == "play" && gamesMap[gameData.type]}
       <RideauSvg
         color={joueurData ? joueurData.color : "grey"}
         dataGame={gameStatus}
       />
-
-      {gameStatus == "play" && gamesMap[gameData.type]}
 
       <canvas
         className="canvasMouse"

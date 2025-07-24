@@ -5,6 +5,12 @@ import Timer from "../overlay/Timer";
 const GameCanvas = ({ onReady, title, subTitle, gameData }) => {
   const canvasRef = useRef(null);
 
+  const getRand255 = () => {
+    return Math.floor(Math.random() * 255);
+  };
+
+  const [backgroundColor, setprout] = useState(`hsl(${getRand255()}, 80%, 95%)`)
+
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -50,20 +56,23 @@ const GameCanvas = ({ onReady, title, subTitle, gameData }) => {
 
   return (
     <>
-    <Timer gameData={gameData} />
-    <div className={`gameCanvas ${isVisible ? "visible" : "notvisible"}`}>
-      {title && <h1 className="gameTitle">{title}</h1>}
-      {subTitle && <p className="gameSubTitle">{subTitle}</p>}
-      
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-        }}
-      />
-    </div>
+      <div className={`gameCanvas ${isVisible ? "visible" : "notvisible"}`}>
+        {title && <h1 className="gameTitle">{title}</h1>}
+        {subTitle && <p className="gameSubTitle">{subTitle}</p>}
+
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            zIndex: "-100",
+            backgroundColor: backgroundColor,
+            borderRadius: "30px",
+          }}
+        />
+        <Timer gameData={gameData} />
+      </div>
     </>
   );
 };

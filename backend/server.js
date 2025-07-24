@@ -215,7 +215,6 @@ const updateJoueurDead = (playerId, dead, roomCode) => {
   }
 };
 
-
 //==============  Rooom ==================
 
 const getRoomData = async (roomCode) => {
@@ -318,9 +317,11 @@ const updateRoom = (roomCode, updates = {}) => {
 
 function setAllDead(roomCode) {
   const roomPlayers = memoryPositions.get(roomCode);
-  roomPlayers.forEach((joueur) => {
-    joueur.dead = true;
-  });
+  if (roomPlayers) {
+    roomPlayers.forEach((joueur) => {
+      joueur.dead = true;
+    });
+  }
 }
 
 // jeux
