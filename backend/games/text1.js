@@ -1,4 +1,4 @@
-function game2(roomcode, updateRoom, setAllDead) {
+function text1(roomcode, updateRoom, setAllDead) {
   let words = [
       "caca",
       "prout",
@@ -75,11 +75,11 @@ function game2(roomcode, updateRoom, setAllDead) {
     status: "play",
     countdown: 5,
     time: 5,
-    type: "game2",
+    type: "text1",
     infos: {
       mot: words[Math.floor(Math.random() * words.length)],
     },
   });
 }
 
-module.exports = game2;
+module.exports = text1;

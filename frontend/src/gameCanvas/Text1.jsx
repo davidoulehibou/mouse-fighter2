@@ -2,12 +2,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import GameCanvas from "./GameCanvas";
 
-const Game2 = ({ gameInfos }) => {
+const Text1 = ({ gameInfos }) => {
   const { gameData, setDead, mousePosition, playerId, positions } = gameInfos;
   const playerInfos = positions.find((obj) => obj.id === playerId);
   
   useEffect(() => {
-    if (playerInfos.text == gameData.infos.mot) {
+    if (playerInfos.text.includes(gameData.infos.mot) ) {
       setDead(false);
     }
   }, [playerInfos.text]);
@@ -28,4 +28,4 @@ const Game2 = ({ gameInfos }) => {
   );
 };
 
-export default Game2;
+export default Text1;

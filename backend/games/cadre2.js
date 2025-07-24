@@ -1,4 +1,4 @@
-function game1(roomcode, updateRoom, setAllDead) {
+function cadre2(roomcode, updateRoom, setAllDead) {
   let posx = Math.random() * 0.8;
   let posy = Math.random() * 0.8;
   let posx2 = posx + Math.random() * (0.2 - 0.1) + 0.1;
@@ -8,7 +8,7 @@ function game1(roomcode, updateRoom, setAllDead) {
     status: "play",
     countdown: 5,
     time: 5,
-    type: "game1",
+    type: "cadre2",
     infos: {
       carre1: {
         x: posx,
@@ -16,8 +16,12 @@ function game1(roomcode, updateRoom, setAllDead) {
         x2: posx2,
         y2: posy2,
       },
+      dir: {
+        x: Math.round(Math.random()) == 0 ? -0.005 : -0.005,
+        y: Math.round(Math.random()) == 0 ? -0.005 : -0.005,
+      },
     },
   });
 }
 
-module.exports = game1;
+module.exports = cadre2;

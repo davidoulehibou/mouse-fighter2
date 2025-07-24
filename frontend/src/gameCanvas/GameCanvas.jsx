@@ -2,7 +2,7 @@
 import { useRef, useEffect, useState } from "react";
 import Timer from "../overlay/Timer";
 
-const GameCanvas = ({ onReady, title, gameData }) => {
+const GameCanvas = ({ onReady, title, subTitle, gameData }) => {
   const canvasRef = useRef(null);
 
   const [windowSize, setWindowSize] = useState({
@@ -52,7 +52,8 @@ const GameCanvas = ({ onReady, title, gameData }) => {
     <>
     <Timer gameData={gameData} />
     <div className={`gameCanvas ${isVisible ? "visible" : "notvisible"}`}>
-      <h1 className="gameTitle">{title}</h1>
+      {title && <h1 className="gameTitle">{title}</h1>}
+      {subTitle && <p className="gameSubTitle">{subTitle}</p>}
       
       <canvas
         ref={canvasRef}

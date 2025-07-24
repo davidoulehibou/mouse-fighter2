@@ -3,13 +3,13 @@ import { useCallback, useEffect } from "react";
 import GameCanvas from "./GameCanvas";
 import { useState } from "react";
 
-const Game1 = ({ gameInfos }) => {
+const Cadre1 = ({ gameInfos }) => {
   const { gameData, setDead, mousePosition, playerId, positions } = gameInfos;
   const GameInfos = gameData.infos;
   const [infos, setInfos] = useState(GameInfos);
   const [directions, setDirections] = useState({
-    x: 0.005,
-    y: 0.005,
+    x: gameData.infos.dir.x,
+    y: gameData.infos.dir.y,
   });
 
   const [playersClicks, setPlayersClicks] = useState([]);
@@ -160,9 +160,10 @@ const Game1 = ({ gameInfos }) => {
     <GameCanvas
       onReady={handleCanvasReady}
       title="Restez dans le cadre !"
+      subTitle="Attention, il bouge !"
       gameData={gameData}
     />
   );
 };
 
-export default Game1;
+export default Cadre1;

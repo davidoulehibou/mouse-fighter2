@@ -2,8 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const WebSocket = require("ws");
 
-const game1 = require("./games/game1");
-const game2 = require("./games/game2");
+const cadre1 = require("./games/cadre1");
+const cadre2 = require("./games/cadre2");
+const text1 = require("./games/text1");
 
 const app = express();
 const port = 3000;
@@ -303,7 +304,7 @@ setInterval(() => {
 // choix du jeu
 
 function newGame(roomcode) {
-  const gamelist = [game1, game2];
+  const gamelist = [cadre1, cadre2, text1];
   const game = gamelist[Math.floor(Math.random() * gamelist.length)];
 
   game(roomcode, updateRoom, setAllDead);

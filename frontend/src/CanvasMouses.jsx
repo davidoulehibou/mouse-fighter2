@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import TextInput from "./overlay/TextInput";
 import getTextColor, { getInsideColor } from "./utils/getTextColor";
 import RideauSvg from "./overlay/RideauSvg";
-import Game1 from "./gameCanvas/Game1";
-import Game2 from "./gameCanvas/Game2";
+import Text1 from "./gameCanvas/Text1";
+import Cadre1 from "./gameCanvas/Cadre1";
+import Cadre2 from "./gameCanvas/Cadre2";
 
 const CanvasMouses = ({
   handleMouseMove,
@@ -180,9 +181,8 @@ const CanvasMouses = ({
     ctx.fillStyle = getInsideColor(color);
     ctx.strokeStyle = color;
 
-    if(click){
+    if (click) {
       ctx.strokeStyle = "white";
-      
     }
 
     ctx.lineWidth = 3;
@@ -219,26 +219,33 @@ const CanvasMouses = ({
       if (!nom || !color) return;
 
       let posx, posy;
-      let clickStatus = false
+      let clickStatus = false;
 
       if (nom !== pseudo) {
         posx = x * windowSize.width;
         posy = y * windowSize.height;
-        clickStatus = click
-        
+        clickStatus = click;
       } else if (mousePosition) {
         posx = mousePosition.x;
         posy = mousePosition.y;
-        clickStatus = isMouseDownRef.current
+        clickStatus = isMouseDownRef.current;
       }
 
-      drawPlayer(ctx, nom.charAt(0).toUpperCase(), posx, posy, color, dead, clickStatus);
+      drawPlayer(
+        ctx,
+        nom.charAt(0).toUpperCase(),
+        posx,
+        posy,
+        color,
+        dead,
+        clickStatus
+      );
 
       if (text) {
         drawSpeechBubble(ctx, text, posx, posy - 10, color, nom);
       }
     });
-  }, [positions, windowSize, mousePosition , isMouseDownRef]);
+  }, [positions, windowSize, mousePosition, isMouseDownRef]);
 
   const gameInfos = {
     gameData: gameData ? gameData : null,
@@ -249,8 +256,9 @@ const CanvasMouses = ({
   };
 
   const gamesMap = {
-    game1: <Game1 gameInfos={gameInfos} />,
-    game2: <Game2 gameInfos={gameInfos} />,
+    cadre1: <Cadre1 gameInfos={gameInfos} />,
+    cadre2: <Cadre2 gameInfos={gameInfos} />,
+    text1: <Text1 gameInfos={gameInfos} />,
   };
 
   return (
