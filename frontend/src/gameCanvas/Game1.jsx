@@ -4,16 +4,29 @@ import GameCanvas from "./GameCanvas";
 import { useState } from "react";
 
 const Game1 = ({ gameInfos }) => {
-  const {
-    gameData,
-    setDead,
-    mousePosition,
-    playerId,
-    positions,
-  } = gameInfos;
-  const infos = gameData.infos;
+  const { gameData, setDead, mousePosition, playerId, positions } = gameInfos;
+  const GameInfos = gameData.infos;
+  const [infos, setInfos] = useState(GameInfos);
+  const [directions, setDirections] = useState({
+    x: 0.005,
+    y: 0.005,
+  });
 
   const [playersClicks, setPlayersClicks] = useState([]);
+
+  const invertDirections = (dir) => {
+    if (dir == "x") {
+      setDirections((prev) => ({
+        x: prev.x * -1,
+        y: prev.y,
+      }));
+    } else if (dir == "y") {
+      setDirections((prev) => ({
+        x: prev.x,
+        y: prev.y * -1,
+      }));
+    }
+  };
 
   useEffect(() => {
     let tempPlayersClicks = positions
@@ -100,10 +113,47 @@ const Game1 = ({ gameInfos }) => {
         setDead(true);
       }
 
+      if (infos.carre1.x2 >= 1 || infos.carre1.x <= 0) {
+        invertDirections("x");
+        let newInfos = {
+          ...infos,
+          carre1: {
+            x: infos.carre1.x - directions.x,
+            x2: infos.carre1.x2 - directions.x,
+            y: infos.carre1.y - directions.y,
+            y2: infos.carre1.y2 - directions.y,
+          },
+        };
+        setInfos(newInfos);
+      } else if (infos.carre1.y2 >= 1 || infos.carre1.y <= 0) {
+        invertDirections("y");
+        let newInfos = {
+          ...infos,
+          carre1: {
+            x: infos.carre1.x - directions.x,
+            x2: infos.carre1.x2 - directions.x,
+            y: infos.carre1.y - directions.y,
+            y2: infos.carre1.y2 - directions.y,
+          },
+        };
+        setInfos(newInfos);
+      } else {
+        let newInfos = {
+          ...infos,
+          carre1: {
+            x: infos.carre1.x + directions.x,
+            x2: infos.carre1.x2 + directions.x,
+            y: infos.carre1.y + directions.y,
+            y2: infos.carre1.y2 + directions.y,
+          },
+        };
+        setInfos(newInfos);
+      }
+
       ctx.fillStyle = color;
       ctx.fill();
     },
-    [infos, mousePosition, playersClicks]
+    [GameInfos, playersClicks]
   );
 
   return (
