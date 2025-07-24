@@ -4,7 +4,7 @@ import GameCanvas from "./GameCanvas";
 import { useState } from "react";
 
 const Cadre1 = ({ gameInfos }) => {
-  const { gameData, setDead, mousePosition, playerId, positions } = gameInfos;
+  const { gameData, setDead, mousePosition, playerId, playersInfos } = gameInfos;
   const GameInfos = gameData.infos;
   const [infos, setInfos] = useState(GameInfos);
   const [directions, setDirections] = useState({
@@ -29,11 +29,11 @@ const Cadre1 = ({ gameInfos }) => {
   };
 
   useEffect(() => {
-    let tempPlayersClicks = positions
+    let tempPlayersClicks = playersInfos
       .filter((player) => player.click)
       .map((player) => ({ id: player.id, x: player.x, y: player.y }));
     setPlayersClicks(tempPlayersClicks);
-  }, [positions]);
+  }, [playersInfos]);
 
   const handleCanvasReady = useCallback(
     (canvas, windowSize) => {

@@ -252,7 +252,7 @@ const CanvasMouses = ({
     setDead: setDead,
     mousePosition: mousePosition,
     playerId: playerId,
-    positions: positions,
+    playersInfos: positions,
   };
 
   const gamesMap = {

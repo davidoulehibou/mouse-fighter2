@@ -3,8 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import GameCanvas from "./GameCanvas";
 
 const Text1 = ({ gameInfos }) => {
-  const { gameData, setDead, mousePosition, playerId, positions } = gameInfos;
-  const playerInfos = positions.find((obj) => obj.id === playerId);
+  const { gameData, setDead, mousePosition, playerId, playersInfos } = gameInfos;
+  const playerInfos = playersInfos.find((obj) => obj.id === playerId);
   
   useEffect(() => {
     if (playerInfos.text.includes(gameData.infos.mot) ) {
