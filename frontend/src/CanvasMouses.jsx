@@ -35,7 +35,12 @@ const CanvasMouses = ({
   const isMouseDownRef = useRef(false);
 
   useEffect(() => {
-    // Mettre à jour la taille de la fenêtre
+    const canvas = canvasRef.current;
+
+    const disableContextMenu = (e) => {
+      e.preventDefault();
+    };
+
     const handleResize = () => {
       setWindowSize({
         width: window.innerWidth,
@@ -75,17 +80,18 @@ const CanvasMouses = ({
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
+    canvas.addEventListener("contextmenu", disableContextMenu);
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
+      canvas.removeEventListener("contextmenu", disableContextMenu);
     };
   }, []);
 
   useEffect(() => {
-    
     if (playerId) {
       positions.map((joueur) => {
         if (joueur.id == playerId) {
@@ -166,7 +172,7 @@ const CanvasMouses = ({
     );
   }
 
-  function drawPlayer(ctx, letter, x, y, color, dead, click) {
+  function drawPlayer(ctx, letter, x, y, color, dead, click, me) {
     ctx.beginPath();
     ctx.globalAlpha = 1;
     if (dead) {
@@ -186,7 +192,7 @@ const CanvasMouses = ({
       ctx.strokeStyle = "white";
     }
 
-    ctx.lineWidth = 3;
+    ctx.lineWidth = me ? 5 : 2;
     ctx.lineJoin = "round";
     ctx.stroke();
     ctx.fill();
@@ -221,6 +227,7 @@ const CanvasMouses = ({
 
       let posx, posy;
       let clickStatus = false;
+      let me = false
 
       if (nom !== pseudo) {
         posx = x * windowSize.width;
@@ -229,6 +236,7 @@ const CanvasMouses = ({
       } else if (mousePosition) {
         posx = mousePosition.x;
         posy = mousePosition.y;
+        me=true
         clickStatus = isMouseDownRef.current;
       }
 
@@ -239,7 +247,8 @@ const CanvasMouses = ({
         posy,
         color,
         dead,
-        clickStatus
+        clickStatus,
+        me
       );
 
       if (text) {

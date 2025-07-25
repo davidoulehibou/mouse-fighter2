@@ -309,11 +309,15 @@ function newGame(roomcode) {
   game(roomcode, updateRoom, setAllDead);
 }
 
+//envoi des infos du jeu
+
 const updateRoom = (roomCode, updates = {}) => {
   const room = rooms.get(roomCode);
   if (!room) return;
   rooms.set(roomCode, { ...room, ...updates });
 };
+
+//Initialiser si besoin tous les jeurs à dead
 
 function setAllDead(roomCode) {
   const roomPlayers = memoryPositions.get(roomCode);
@@ -323,8 +327,6 @@ function setAllDead(roomCode) {
     });
   }
 }
-
-// jeux
 
 // attribuer les points
 
