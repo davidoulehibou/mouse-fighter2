@@ -180,10 +180,18 @@ const CanvasMouses = ({
     }
 
     ctx.moveTo(x, y);
-    ctx.lineTo(x, y + 18);
-    ctx.lineTo(x + 7, y + 13);
-    ctx.lineTo(x + 13, y + 13);
-    ctx.lineTo(x, y);
+    if (me) {
+      ctx.lineTo(x, y + 21.5);
+      ctx.lineTo(x + 8.5, y + 15.5);
+      ctx.lineTo(x + 15.5, y + 15.5);
+      ctx.lineTo(x, y);
+    } else {
+      ctx.lineTo(x, y + 18);
+      ctx.lineTo(x + 7, y + 13);
+      ctx.lineTo(x + 13, y + 13);
+      ctx.lineTo(x, y);
+    }
+
     ctx.closePath();
     ctx.fillStyle = getInsideColor(color);
     ctx.strokeStyle = color;
@@ -227,7 +235,7 @@ const CanvasMouses = ({
 
       let posx, posy;
       let clickStatus = false;
-      let me = false
+      let me = false;
 
       if (nom !== pseudo) {
         posx = x * windowSize.width;
@@ -236,7 +244,7 @@ const CanvasMouses = ({
       } else if (mousePosition) {
         posx = mousePosition.x;
         posy = mousePosition.y;
-        me=true
+        me = true;
         clickStatus = isMouseDownRef.current;
       }
 
