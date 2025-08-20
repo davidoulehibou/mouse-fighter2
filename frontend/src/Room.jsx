@@ -50,7 +50,7 @@ const Room = ({ handleError }) => {
       }
     };
 
-    const handleBeforeUnload = (e) => {
+    const handleBeforeUnload = () => {
       handleDisconnect();
     };
 
