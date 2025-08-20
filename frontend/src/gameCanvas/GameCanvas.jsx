@@ -9,7 +9,7 @@ const GameCanvas = ({ onReady, title, subTitle, gameData }) => {
     return Math.floor(Math.random() * 255);
   };
 
-  const [backgroundColor, setprout] = useState(`hsl(${getRand255()}, 80%, 95%)`)
+  const [backgroundColor] = useState(`hsl(${getRand255()}, 80%, 95%)`)
 
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,

@@ -4,7 +4,7 @@ import GameCanvas from "./GameCanvas";
 import { useState } from "react";
 
 const Cadre1 = ({ gameInfos }) => {
-  const { gameData, setDead, mousePosition, playerId, playersInfos } = gameInfos;
+  const { gameData, setDead, mousePosition, playersInfos } = gameInfos;
   const GameInfos = gameData.infos;
   const [infos, setInfos] = useState(GameInfos);
   const [directions, setDirections] = useState({

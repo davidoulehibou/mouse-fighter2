@@ -1,9 +1,9 @@
 // Game1.jsx
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect} from "react";
 import GameCanvas from "./GameCanvas";
 
 const Text1 = ({ gameInfos }) => {
-  const { gameData, setDead, mousePosition, playerId, playersInfos } =
+  const { gameData, setDead, playerId, playersInfos } =
     gameInfos;
   const playerInfos = playersInfos.find((obj) => obj.id === playerId);
 
@@ -13,7 +13,7 @@ const Text1 = ({ gameInfos }) => {
         setDead(false);
       }
     }
-  }, [playerInfos]);
+  }, [playerInfos, gameData, setDead]);
 
   const handleCanvasReady = useCallback((canvas, windowSize) => {
     const ctx = canvas.getContext("2d");

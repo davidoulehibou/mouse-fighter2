@@ -17,8 +17,6 @@ const CanvasMouses = ({
   const gameStatus = gameData.status;
   const canvasRef = useRef(null);
 
-  const [numJoueur, setNumJoueur] = useState(null);
-
   const [joueurData, setJoueurData] = useState(null);
 
   const [windowSize, setWindowSize] = useState({
@@ -303,7 +301,6 @@ const CanvasMouses = ({
           transform: "scale(1)",
         }}
       ></canvas>
-      {numJoueur && <TextInput joueur={numJoueur} name={pseudo} />}
     </>
   );
 };
