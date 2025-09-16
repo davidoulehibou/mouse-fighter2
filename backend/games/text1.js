@@ -1,11 +1,7 @@
 function text1(roomcode, updateRoom, setAllDead) {
   let words = [
-      "caca",
-      "prout",
-      "zizi",
       "popo",
       "dodo",
-      "pipi",
       "bidet",
       "pouet",
       "zinzin",
@@ -44,7 +40,6 @@ function text1(roomcode, updateRoom, setAllDead) {
       "tarte",
       "crazy",
       "coucou",
-      "kiki",
       "boule",
       "tigre",
       "pomme",
